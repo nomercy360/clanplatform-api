@@ -19,6 +19,11 @@ func parseToken(authorizationHeader string) (string, error) {
 func WithAuth(jwtSecret string) func(handler http.Handler) http.Handler {
 	return func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Path == "/admin/auth" {
+				handler.ServeHTTP(w, r)
+				return
+			}
+
 			token, err := parseToken(r.Header.Get("Authorization"))
 			if err != nil {
 				_ = WriteError(w, http.StatusUnauthorized, err.Error())

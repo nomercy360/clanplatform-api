@@ -11,11 +11,7 @@ require (
 )
 
 require (
-	github.com/golang-jwt/jwt/v5 v5.2.1 // indirect
-	golang.org/x/net v0.21.0 // indirect
-)
-
-require (
-	github.com/labstack/echo/v5 v5.0.0-20230722203903-ec5b858dab61
+	github.com/golang-jwt/jwt/v5 v5.2.1
+	github.com/oklog/ulid/v2 v2.1.0
 	golang.org/x/crypto v0.19.0
 )

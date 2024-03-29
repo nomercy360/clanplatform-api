@@ -63,14 +63,21 @@ func (api *api) HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
 func (api *api) RegisterRoutes(r chi.Router) {
 	r.Get("/health", api.HealthCheckHandler)
 
-	r.Mount("/users", UserRoutes(api))
+	r.Mount("/admin", AdminRoutes(api))
 }
 
-func UserRoutes(api *api) http.Handler {
+func AdminRoutes(api *api) http.Handler {
 	r := chi.NewRouter()
+
 	r.Use(WithAuth("secret"))
 
-	r.Get("/", api.ListUsers)
+	r.Post("/auth", api.Auth)
+	r.Post("/auth/token", api.Auth)
+	r.Get("/users", api.ListUsers)
+	r.Get("/discounts", api.ListDiscounts)
+	r.Post("/discounts", api.CreateDiscount)
+	r.Post("/invites", api.InviteUser)
+	r.Post("/invites/accept", api.AcceptInvite)
 
 	return r
 }

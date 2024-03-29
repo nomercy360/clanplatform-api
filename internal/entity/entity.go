@@ -1,19 +1,21 @@
 package entity
 
 import (
+	"encoding/json"
+	"errors"
 	"time"
 )
 
 type User struct {
-	ID           int64        `db:"id"`
-	Email        string       `db:"email"`
-	PasswordHash string       `db:"password_hash"`
-	FirstName    string       `db:"first_name"`
-	LastName     string       `db:"last_name"`
-	Role         UserRoleEnum `db:"role"`
-	CreatedAt    time.Time    `db:"created_at"`
-	UpdatedAt    time.Time    `db:"updated_at"`
-	DeletedAt    *time.Time   `db:"deleted_at"`
+	ID           int64        `db:"id" json:"id"`
+	Email        string       `db:"email" json:"email"`
+	PasswordHash string       `db:"password_hash" json:"-"`
+	FirstName    string       `db:"first_name" json:"first_name"`
+	LastName     string       `db:"last_name" json:"last_name"`
+	Role         UserRoleEnum `db:"role" json:"role"`
+	CreatedAt    time.Time    `db:"created_at" json:"created_at"`
+	UpdatedAt    time.Time    `db:"updated_at" json:"updated_at"`
+	DeletedAt    *time.Time   `db:"deleted_at" json:"-"`
 }
 
 type Customer struct {
@@ -50,7 +52,34 @@ type Category struct {
 	DeletedAt *time.Time `db:"deleted_at"`
 }
 
-type ProductCategory struct {
+type Product struct {
+	ID           int64           `db:"id"`
+	Title        string          `db:"title"`
+	Subtitle     string          `db:"subtitle"`
+	Description  string          `db:"description"`
+	Handle       string          `db:"handle"`
+	Brand        string          `db:"brand"`
+	Condition    string          `db:"condition"`
+	Material     string          `db:"material"`
+	Model        string          `db:"model"`
+	IsPublished  bool            `db:"is_published"`
+	CollectionID int64           `db:"collection_id"`
+	CreatedAt    time.Time       `db:"created_at"`
+	UpdatedAt    time.Time       `db:"updated_at"`
+	DeletedAt    *time.Time      `db:"deleted_at"`
+	Metadata     json.RawMessage `db:"metadata"`
+}
+
+type ProductCollection struct {
+	ID        int64      `db:"id"`
+	Title     string     `db:"title"`
+	Handle    string     `db:"handle"`
+	CreatedAt time.Time  `db:"created_at"`
+	UpdatedAt time.Time  `db:"updated_at"`
+	DeletedAt *time.Time `db:"deleted_at"`
+}
+
+type ProductCategoryProduct struct {
 	ProductID  int64 `db:"product_id"`
 	CategoryID int64 `db:"category_id"`
 }
@@ -61,30 +90,13 @@ type ProductImage struct {
 }
 
 type ProductPrice struct {
-	ID         int64      `db:"id"`
-	ProductID  int64      `db:"product_id"`
-	CurrencyID string     `db:"currency_id"`
-	Price      int        `db:"price"`
-	CreatedAt  time.Time  `db:"created_at"`
-	UpdatedAt  time.Time  `db:"updated_at"`
-	DeletedAt  *time.Time `db:"deleted_at"`
-}
-
-type Product struct {
-	ID             int64      `db:"id"`
-	Title          string     `db:"title"`
-	Subtitle       string     `db:"subtitle"`
-	Description    string     `db:"description"`
-	Handle         string     `db:"handle"`
-	Brand          string     `db:"brand"`
-	Condition      string     `db:"condition"`
-	Material       string     `db:"material"`
-	Model          string     `db:"model"`
-	CollectionID   int64      `db:"collection_id"`
-	ProductionNote string     `db:"production_note"`
-	CreatedAt      time.Time  `db:"created_at"`
-	UpdatedAt      time.Time  `db:"updated_at"`
-	DeletedAt      *time.Time `db:"deleted_at"`
+	ID               int64      `db:"id"`
+	ProductVariantID int64      `db:"product_variant_id"`
+	CurrencyID       string     `db:"currency_id"`
+	Price            int        `db:"price"`
+	CreatedAt        time.Time  `db:"created_at"`
+	UpdatedAt        time.Time  `db:"updated_at"`
+	DeletedAt        *time.Time `db:"deleted_at"`
 }
 
 type Address struct {
@@ -103,25 +115,24 @@ type Address struct {
 	DeletedAt  *time.Time `db:"deleted_at"`
 }
 
-type Promotion struct {
-	ID         int64            `db:"id"`
-	Code       string           `db:"code"`
-	IsActive   bool             `db:"is_active"`
-	Type       DiscountTypeEnum `db:"type"`
-	UsageLimit int              `db:"usage_limit"`
-	EndsAt     time.Time        `db:"ends_at"`
-	CreatedAt  time.Time        `db:"created_at"`
-	UpdatedAt  time.Time        `db:"updated_at"`
-	DeletedAt  *time.Time       `db:"deleted_at"`
+type Discount struct {
+	ID         int64            `db:"id" json:"id"`
+	Code       string           `db:"code" json:"code"`
+	IsActive   bool             `db:"is_active" json:"is_active"`
+	Type       DiscountTypeEnum `db:"type" json:"type"`
+	UsageLimit int              `db:"usage_limit" json:"usage_limit"`
+	UsageCount int              `db:"usage_count" json:"usage_count"`
+	StartsAt   time.Time        `db:"starts_at" json:"starts_at"`
+	EndsAt     *time.Time       `db:"ends_at" json:"ends_at"`
+	CreatedAt  time.Time        `db:"created_at" json:"created_at"`
+	UpdatedAt  time.Time        `db:"updated_at" json:"updated_at"`
+	DeletedAt  *time.Time       `db:"deleted_at" json:"deleted_at"`
+	Value      int              `db:"value" json:"value"`
 }
 
 type PaymentProvider struct {
-	ID        int64      `db:"id"`
-	Name      string     `db:"name"`
-	Enabled   bool       `db:"enabled"`
-	CreatedAt time.Time  `db:"created_at"`
-	UpdatedAt time.Time  `db:"updated_at"`
-	DeletedAt *time.Time `db:"deleted_at"`
+	ID      string `db:"id"`
+	Enabled bool   `db:"enabled"`
 }
 
 type Payment struct {
@@ -139,7 +150,7 @@ type Order struct {
 	ID               int64             `db:"id"`
 	CustomerID       int64             `db:"customer_id"`
 	AddressID        int64             `db:"address_id"`
-	PromotionID      int64             `db:"promotion_id"`
+	DiscountID       int64             `db:"discount_id"`
 	Status           OrderStatusEnum   `db:"status"`
 	PaymentStatus    PaymentStatusEnum `db:"payment_status"`
 	TotalPrice       int               `db:"total_price"`
@@ -182,8 +193,13 @@ type ProductVariant struct {
 	UpdatedAt    time.Time          `db:"updated_at"`
 }
 
+type NotificationProvider struct {
+	ID      string `db:"id"`
+	Enabled bool   `db:"enabled"`
+}
+
 type Notification struct {
-	ID           string    `db:"id"`
+	ID           int64     `db:"id"`
 	EventName    string    `db:"event_name"`
 	ResourceType string    `db:"resource_type"`
 	ResourceID   string    `db:"resource_id"`
@@ -194,3 +210,23 @@ type Notification struct {
 	CreatedAt    time.Time `db:"created_at"`
 	UpdatedAt    time.Time `db:"updated_at"`
 }
+
+type Invite struct {
+	ID        int64        `db:"id"`
+	Email     string       `db:"email"`
+	Role      UserRoleEnum `db:"role"`
+	CreatedAt time.Time    `db:"created_at"`
+	UpdatedAt time.Time    `db:"updated_at"`
+	ExpiresAt time.Time    `db:"expires_at"`
+	Accepted  bool         `db:"accepted"`
+	DeletedAt *time.Time   `db:"deleted_at"`
+	Token     string       `db:"token"`
+}
+
+var (
+	ErrNotFound        = errors.New("not found")
+	ErrAlreadyExists   = errors.New("already exists")
+	ErrInvalidArgument = errors.New("invalid argument")
+	ErrUnauthorized    = errors.New("unauthorized")
+	ErrDatabase        = errors.New("database error")
+)

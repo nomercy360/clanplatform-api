@@ -28,9 +28,9 @@ const (
 type PaymentStatusEnum string
 
 const (
-	PaymentPending PaymentStatusEnum = "pending"
-	Confirmed      PaymentStatusEnum = "confirmed"
-	Refunded       PaymentStatusEnum = "refunded"
+	PaymentPending   PaymentStatusEnum = "pending"
+	PaymentConfirmed PaymentStatusEnum = "confirmed"
+	Refunded         PaymentStatusEnum = "refunded"
 )
 
 type ProductVariantEnum string

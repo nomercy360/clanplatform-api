@@ -1,9 +1,6 @@
 package db
 
 import (
-	"database/sql"
-	"errors"
-	"github.com/lib/pq"
 	"log"
 
 	"github.com/jmoiron/sqlx"
@@ -39,33 +36,6 @@ func (s *Storage) Close() {
 	}
 }
 
-func IsDuplicationError(err error) bool {
-	if err == nil {
-		return false
-	}
-
-	var pqErr *pq.Error
-	ok := errors.As(err, &pqErr)
-	return ok && pqErr.Code == "23505"
-}
-
-func IsForeignKeyViolationError(err error) bool {
-	if err == nil {
-		return false
-	}
-
-	var pqErr *pq.Error
-	ok := errors.As(err, &pqErr)
-	return ok && pqErr.Code == "23503"
-}
-
-// IsNoRowsError check for no rows found error
-func IsNoRowsError(err error) bool {
-	return errors.Is(err, sql.ErrNoRows)
-}
-
 func (s *Storage) Ping() error {
-	err := s.pg.Ping()
-
-	return err
+	return s.pg.Ping()
 }
