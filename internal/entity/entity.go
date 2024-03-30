@@ -53,30 +53,29 @@ type Category struct {
 }
 
 type Product struct {
-	ID           int64           `db:"id"`
-	Title        string          `db:"title"`
-	Subtitle     string          `db:"subtitle"`
-	Description  string          `db:"description"`
-	Handle       string          `db:"handle"`
-	Brand        string          `db:"brand"`
-	Condition    string          `db:"condition"`
-	Material     string          `db:"material"`
-	Model        string          `db:"model"`
-	IsPublished  bool            `db:"is_published"`
-	CollectionID int64           `db:"collection_id"`
-	CreatedAt    time.Time       `db:"created_at"`
-	UpdatedAt    time.Time       `db:"updated_at"`
-	DeletedAt    *time.Time      `db:"deleted_at"`
-	Metadata     json.RawMessage `db:"metadata"`
+	ID           int64            `db:"id" json:"id"`
+	Title        string           `db:"title" json:"title"`
+	Subtitle     string           `db:"subtitle" json:"subtitle"`
+	Description  string           `db:"description" json:"description"`
+	Handle       string           `db:"handle" json:"handle"`
+	IsPublished  bool             `db:"is_published" json:"is_published"`
+	CollectionID *int64           `db:"collection_id" json:"collection_id"`
+	CreatedAt    time.Time        `db:"created_at" json:"created_at"`
+	UpdatedAt    time.Time        `db:"updated_at" json:"updated_at"`
+	DeletedAt    *time.Time       `db:"deleted_at" json:"deleted_at"`
+	Metadata     *json.RawMessage `db:"metadata" json:"metadata"`
+}
+
+type ProductFull struct {
 }
 
 type ProductCollection struct {
-	ID        int64      `db:"id"`
-	Title     string     `db:"title"`
-	Handle    string     `db:"handle"`
-	CreatedAt time.Time  `db:"created_at"`
-	UpdatedAt time.Time  `db:"updated_at"`
-	DeletedAt *time.Time `db:"deleted_at"`
+	ID        int64      `db:"id" json:"id"`
+	Title     string     `db:"title" json:"title"`
+	Handle    string     `db:"handle" json:"handle"`
+	CreatedAt time.Time  `db:"created_at" json:"created_at"`
+	UpdatedAt time.Time  `db:"updated_at" json:"updated_at"`
+	DeletedAt *time.Time `db:"deleted_at" json:"deleted_at"`
 }
 
 type ProductCategoryProduct struct {
@@ -93,10 +92,15 @@ type ProductPrice struct {
 	ID               int64      `db:"id"`
 	ProductVariantID int64      `db:"product_variant_id"`
 	CurrencyID       string     `db:"currency_id"`
-	Price            int        `db:"price"`
+	Amount           int        `db:"amount"`
 	CreatedAt        time.Time  `db:"created_at"`
 	UpdatedAt        time.Time  `db:"updated_at"`
 	DeletedAt        *time.Time `db:"deleted_at"`
+}
+
+type Price struct {
+	Amount       int    `json:"amount"`
+	CurrencyCode string `json:"currency_code"`
 }
 
 type Address struct {
@@ -183,14 +187,12 @@ type ShippingMethod struct {
 }
 
 type ProductVariant struct {
-	ID           int64              `db:"id"`
-	ProductID    int64              `db:"product_id"`
-	VariantName  ProductVariantEnum `db:"variant_name"`
-	VariantValue string             `db:"variant_value"`
-	SKU          string             `db:"sku"`
-	Inventory    int                `db:"inventory"`
-	CreatedAt    time.Time          `db:"created_at"`
-	UpdatedAt    time.Time          `db:"updated_at"`
+	ID        int64     `db:"id"`
+	ProductID int64     `db:"product_id"`
+	Title     string    `db:"title"`
+	Inventory int       `db:"inventory"`
+	CreatedAt time.Time `db:"created_at"`
+	UpdatedAt time.Time `db:"updated_at"`
 }
 
 type NotificationProvider struct {

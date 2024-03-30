@@ -32,10 +32,3 @@ const (
 	PaymentConfirmed PaymentStatusEnum = "confirmed"
 	Refunded         PaymentStatusEnum = "refunded"
 )
-
-type ProductVariantEnum string
-
-const (
-	Size  ProductVariantEnum = "size"
-	Color ProductVariantEnum = "color"
-)

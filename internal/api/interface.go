@@ -17,4 +17,15 @@ type storage interface {
 	GetDiscounts() ([]entity.Discount, error)
 	UpdateDiscount(discount entity.Discount) (entity.Discount, error)
 	DeleteDiscount(id string) error
+
+	ListCollections() ([]entity.ProductCollection, error)
+	CreateCollection(title string, handle string) (entity.ProductCollection, error)
+	GetCollectionByID(id int64) (entity.ProductCollection, error)
+	UpdateCollection(title *string, handle *string, id int64) (entity.ProductCollection, error)
+	DeleteCollection(id int64) error
+	AddProductsToCollection(collectionID int64, productIDs []int64) error
+	RemoveProductsFromCollection(collectionID int64, productIDs []int64) error
+
+	ListProducts() ([]entity.Product, error)
+	CreateProductVariant(productID int64, title string, priceList []entity.Price, inventory int) (entity.ProductVariant, error)
 }

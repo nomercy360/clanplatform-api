@@ -77,10 +77,24 @@ func AdminRoutes(api *api) http.Handler {
 	r.Post("/auth", api.Auth)
 	r.Post("/auth/token", api.Auth)
 	r.Get("/users", api.ListUsers)
+
 	r.Get("/discounts", api.ListDiscounts)
 	r.Post("/discounts", api.CreateDiscount)
+
 	r.Post("/invites", api.InviteUser)
 	r.Post("/invites/accept", api.AcceptInvite)
+	r.Get("/invites", api.ListInvites)
+
+	r.Get("/collections", api.ListCollections)
+	r.Post("/collections", api.CreateCollection)
+	r.Get("/collections/{id}", api.GetCollection)
+	r.Post("/collections/{id}", api.UpdateCollection)
+	r.Delete("/collections/{id}", api.DeleteCollection)
+	r.Post("/collections/{id}/products", api.AddProductsToCollection)
+	r.Delete("/collections/{id}/products", api.RemoveProductsFromCollection)
+
+	r.Get("/products", api.ListProducts)
+	r.Post("/products/{id}/variants", api.CreateProductVariant)
 
 	return r
 }
