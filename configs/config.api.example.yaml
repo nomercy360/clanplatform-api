@@ -1,5 +1,5 @@
 jwt_secret: supersecretstring
-db_conn_string: "host=db port=5432 user=postgres password=postgres dbname=touchly sslmode=disable"
+db_conn_string: "host=db port=5432 user=postgres password=postgres dbname=clanplatform sslmode=disable"
 server:
   port: 8080
   host: 0.0.0.0

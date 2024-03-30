@@ -12,6 +12,5 @@ require (
 
 require (
 	github.com/golang-jwt/jwt/v5 v5.2.1
-	github.com/oklog/ulid/v2 v2.1.0
-	golang.org/x/crypto v0.19.0
+	golang.org/x/crypto v0.21.0
 )
