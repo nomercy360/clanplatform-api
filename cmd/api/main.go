@@ -3,6 +3,7 @@ package main
 import (
 	"clanplatform/internal/api"
 	"clanplatform/internal/db"
+	"clanplatform/internal/utils"
 	"flag"
 	"github.com/go-chi/chi/v5"
 	"gopkg.in/yaml.v3"
@@ -62,7 +63,9 @@ func main() {
 
 	// Create a new API instance
 
-	app := api.New(&storage)
+	email := utils.NewEmailClient(config.ResendApiKey)
+
+	app := api.New(&storage, email, config.JWTSecret)
 
 	app.RegisterRoutes(r)
 

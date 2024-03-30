@@ -1,9 +1,12 @@
 package api
 
 import (
+	"bytes"
 	"clanplatform/internal/entity"
+	"clanplatform/internal/utils"
 	"encoding/json"
 	"github.com/golang-jwt/jwt/v5"
+	"html/template"
 	"net/http"
 	"time"
 )
@@ -26,7 +29,7 @@ func (api *api) InviteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	mySigningKey := []byte("AllYourBase")
+	mySigningKey := []byte(api.jwtSecret)
 
 	claims := &jwt.RegisteredClaims{
 		IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -41,6 +44,38 @@ func (api *api) InviteUser(w http.ResponseWriter, r *http.Request) {
 	err = api.storage.InviteUser(ss, data.Email, role)
 
 	if err != nil {
+		_ = WriteError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	type Context struct {
+		InviteURL string
+	}
+
+	tmpl, err := template.ParseFiles("templates/otp.gohtml")
+
+	if err != nil {
+		_ = WriteError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	var tpl bytes.Buffer
+	// TODO: change to real URL when frontend is ready
+	err = tmpl.Execute(&tpl, Context{InviteURL: "http://localhost:8080/invite/accept?token=" + ss})
+
+	if err != nil {
+		_ = WriteError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	message := &utils.MailMessage{
+		To:       data.Email,
+		Subject:  "You have been invited to join the platform",
+		From:     "hi@mxksim.dev",
+		HtmlBody: tpl.String(),
+	}
+
+	if err = api.email.SendEmail(message); err != nil {
 		_ = WriteError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -80,7 +115,7 @@ func (api *api) AcceptInvite(w http.ResponseWriter, r *http.Request) {
 	}
 
 	token, err := jwt.Parse(data.Token, func(token *jwt.Token) (interface{}, error) {
-		return []byte("AllYourBase"), nil
+		return []byte(api.jwtSecret), nil
 	})
 
 	if err != nil || !token.Valid {

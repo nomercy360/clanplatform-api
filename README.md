@@ -3,5 +3,6 @@
 ## How to run
 
 ```bash
-docker compose -f scripts/docker-compose.yml --project-directory . up
+cp configs/config.api.example.yml config.yaml
+go run main.go
 ```

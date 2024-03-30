@@ -6,18 +6,26 @@ import (
 	"github.com/lib/pq"
 )
 
-const UniqueViolationConstraint = "unique_violation"
-const ForeignKeyViolationConstraint = "foreign_key_violation"
-const CheckViolationConstraint = "check_violation"
-const ExclusionViolationConstraint = "exclusion_violation"
-
-func ErrorIs(err error, c string) bool {
-	var pgErr *pq.Error
-	ok := errors.As(err, &pgErr)
-
-	return ok && pgErr.Code.Name() == c
-}
-
 func IsNoRowsError(err error) bool {
 	return errors.Is(err, sql.ErrNoRows)
+}
+
+func IsDuplicationError(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	var pqErr *pq.Error
+	ok := errors.As(err, &pqErr)
+	return ok && pqErr.Code == "23505"
+}
+
+func IsForeignKeyViolationError(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	var pqErr *pq.Error
+	ok := errors.As(err, &pqErr)
+	return ok && pqErr.Code == "23503"
 }

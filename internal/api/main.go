@@ -1,6 +1,7 @@
 package api
 
 import (
+	"clanplatform/internal/utils"
 	"encoding/json"
 	"github.com/go-chi/chi/v5"
 	"net/http"
@@ -14,11 +15,13 @@ type SMTPConfig struct {
 }
 
 type api struct {
-	storage storage
+	storage   storage
+	email     *utils.EmailClient
+	jwtSecret string
 }
 
-func New(storage storage) *api {
-	return &api{storage: storage}
+func New(storage storage, email *utils.EmailClient, jwtSecret string) *api {
+	return &api{storage: storage, email: email, jwtSecret: jwtSecret}
 }
 
 // WriteError responds to a HTTP request with an error.

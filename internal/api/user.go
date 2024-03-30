@@ -47,6 +47,7 @@ func (api *api) verifyUserCredentials(email, password string) (entity.User, erro
 	return user, err
 }
 
+// Auth Setting cookie and returning user
 func (api *api) Auth(w http.ResponseWriter, r *http.Request) {
 	email, password, err := decodeCredentials(r)
 	if err != nil {
@@ -60,7 +61,7 @@ func (api *api) Auth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := generateToken(user.Email, user.Role, "AllYourBase")
+	token, err := generateToken(user.Email, user.Role, api.jwtSecret)
 	if err != nil {
 		_ = WriteError(w, http.StatusInternalServerError, "failed to generate token")
 		return
@@ -80,6 +81,7 @@ func (api *api) Auth(w http.ResponseWriter, r *http.Request) {
 	_ = WriteJSON(w, http.StatusOK, user)
 }
 
+// AuthToken Returning jwt token
 func (api *api) AuthToken(w http.ResponseWriter, r *http.Request) {
 	email, password, err := decodeCredentials(r)
 	if err != nil {
@@ -93,7 +95,7 @@ func (api *api) AuthToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := generateToken(user.Email, user.Role, "AllYourBase")
+	token, err := generateToken(user.Email, user.Role, api.jwtSecret)
 	if err != nil {
 		_ = WriteError(w, http.StatusInternalServerError, "failed to generate token")
 		return
