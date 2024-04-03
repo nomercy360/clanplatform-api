@@ -11,8 +11,8 @@ type storage struct {
 	pg *sqlx.DB
 }
 
-// InitDB initializes a new database connection.
-func InitDB(connStr string) (*storage, error) {
+// NewDB initializes a new database connection.
+func NewDB(connStr string) (*storage, error) {
 	db, err := sqlx.Connect("postgres", connStr)
 	if err != nil {
 		return nil, err

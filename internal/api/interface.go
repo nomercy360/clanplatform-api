@@ -29,7 +29,7 @@ type storage interface {
 	AddProductsToCollection(collectionID int64, productIDs []int64) error
 	RemoveProductsFromCollection(collectionID int64, productIDs []int64) error
 
-	ListProducts() ([]entity.Product, error)
+	ListProducts() ([]entity.ProductWithDetails, error)
 	CreateProductVariant(productID int64, title string, priceList []entity.Price, inventory int) (entity.ProductVariant, error)
 }
 

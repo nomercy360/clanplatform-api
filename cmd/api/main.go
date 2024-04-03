@@ -50,7 +50,7 @@ func main() {
 		log.Fatalf("Error reading config: %v", err)
 	}
 
-	storage, err := db.InitDB(config.DbConnString)
+	storage, err := db.NewDB(config.DbConnString)
 
 	if err != nil {
 		log.Fatalf("Failed to initialize database: %v\n", err)

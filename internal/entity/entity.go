@@ -19,37 +19,37 @@ type User struct {
 }
 
 type Customer struct {
-	ID         int64      `db:"id"`
-	Email      string     `db:"email"`
-	FirstName  string     `db:"first_name"`
-	LastName   string     `db:"last_name"`
-	CreatedAt  time.Time  `db:"created_at"`
-	UpdatedAt  time.Time  `db:"updated_at"`
-	DeletedAt  *time.Time `db:"deleted_at"`
-	HasAccount bool       `db:"has_account"`
+	ID         int64      `db:"id" json:"id"`
+	Email      string     `db:"email" json:"email"`
+	FirstName  string     `db:"first_name" json:"first_name"`
+	LastName   string     `db:"last_name" json:"last_name"`
+	CreatedAt  time.Time  `db:"created_at" json:"created_at"`
+	UpdatedAt  time.Time  `db:"updated_at" json:"updated_at"`
+	DeletedAt  *time.Time `db:"deleted_at" json:"deleted_at"`
+	HasAccount bool       `db:"has_account" json:"has_account"`
 }
 
 type Image struct {
-	ID        int64      `db:"id"`
-	URL       string     `db:"url"`
-	CreatedAt time.Time  `db:"created_at"`
-	IsMain    bool       `db:"is_main"`
-	UpdatedAt time.Time  `db:"updated_at"`
-	DeletedAt *time.Time `db:"deleted_at"`
+	ID        int64      `db:"id" json:"id"`
+	URL       string     `db:"url" json:"url"`
+	CreatedAt time.Time  `db:"created_at" json:"created_at"`
+	IsMain    bool       `db:"is_main" json:"is_main"`
+	UpdatedAt time.Time  `db:"updated_at" json:"updated_at"`
+	DeletedAt *time.Time `db:"deleted_at" json:"deleted_at"`
 }
 
 type Currency struct {
-	Code   string `db:"code"`
-	Name   string `db:"name"`
-	Symbol string `db:"symbol"`
+	Code   string `db:"code" json:"code"`
+	Name   string `db:"name" json:"name"`
+	Symbol string `db:"symbol" json:"symbol"`
 }
 
 type Category struct {
-	ID        int64      `db:"id"`
-	Name      string     `db:"name"`
-	CreatedAt time.Time  `db:"created_at"`
-	UpdatedAt time.Time  `db:"updated_at"`
-	DeletedAt *time.Time `db:"deleted_at"`
+	ID        int64      `db:"id" json:"id"`
+	Name      string     `db:"name" json:"name"`
+	CreatedAt time.Time  `db:"created_at" json:"created_at"`
+	UpdatedAt time.Time  `db:"updated_at" json:"updated_at"`
+	DeletedAt *time.Time `db:"deleted_at" json:"deleted_at"`
 }
 
 type Product struct {
@@ -66,7 +66,22 @@ type Product struct {
 	Metadata     *json.RawMessage `db:"metadata" json:"metadata"`
 }
 
-type ProductFull struct {
+type ProductWithDetails struct {
+	ID           int64            `db:"id" json:"id"`
+	Title        string           `db:"title" json:"title"`
+	Subtitle     string           `db:"subtitle" json:"subtitle"`
+	Description  string           `db:"description" json:"description"`
+	Handle       string           `db:"handle" json:"handle"`
+	IsPublished  bool             `db:"is_published" json:"is_published"`
+	CollectionID *int64           `db:"collection_id" json:"collection_id"`
+	CreatedAt    time.Time        `db:"created_at" json:"created_at"`
+	UpdatedAt    time.Time        `db:"updated_at" json:"updated_at"`
+	DeletedAt    *time.Time       `db:"deleted_at" json:"deleted_at"`
+	Metadata     *json.RawMessage `db:"metadata" json:"metadata"`
+	Images       []Image          `json:"images"`
+	Variants     []ProductVariant `json:"variants"`
+	Categories   []Category       `json:"categories"`
+	Prices       []ProductPrice   `json:"prices"`
 }
 
 type ProductCollection struct {

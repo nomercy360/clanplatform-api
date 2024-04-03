@@ -69,6 +69,9 @@ CREATE TABLE products
     description   TEXT,
     handle        VARCHAR(255) NOT NULL,
     is_published  BOOLEAN      NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    deleted_at TIMESTAMP WITH TIME ZONE,
     metadata      JSONB,
     collection_id INT8
         CONSTRAINT fk_products_collections REFERENCES product_collections
@@ -102,6 +105,7 @@ CREATE TABLE product_variants
     inventory  INT4,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    deleted_at TIMESTAMP WITH TIME ZONE,
     UNIQUE (product_id, title)
 );
 
