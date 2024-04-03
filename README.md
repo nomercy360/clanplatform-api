@@ -4,7 +4,7 @@
 
 ```bash
 go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
-migrate -source file://${PWD}/migrations -database postgres://postgres:mysecretpassword@localhost:5432/clanplatform\?sslmode=disable up
+migrate -source file://${PWD}/scripts/migrations -database postgres://postgres:mysecretpassword@localhost:5432/clanplatform\?sslmode=disable up
 ```
 
 ```bash

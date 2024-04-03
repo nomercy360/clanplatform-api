@@ -3,7 +3,7 @@ package api
 import (
 	"bytes"
 	"clanplatform/internal/entity"
-	"clanplatform/internal/utils"
+	"clanplatform/internal/services"
 	"encoding/json"
 	"github.com/golang-jwt/jwt/v5"
 	"html/template"
@@ -68,7 +68,7 @@ func (api *api) InviteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	message := &utils.MailMessage{
+	message := &services.MailMessage{
 		To:       data.Email,
 		Subject:  "You have been invited to join the platform",
 		From:     "hi@mxksim.dev",

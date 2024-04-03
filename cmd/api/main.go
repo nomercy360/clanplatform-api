@@ -3,7 +3,7 @@ package main
 import (
 	"clanplatform/internal/api"
 	"clanplatform/internal/db"
-	"clanplatform/internal/utils"
+	"clanplatform/internal/services"
 	"flag"
 	"github.com/go-chi/chi/v5"
 	"gopkg.in/yaml.v3"
@@ -50,7 +50,7 @@ func main() {
 		log.Fatalf("Error reading config: %v", err)
 	}
 
-	storage, err := db.Init(config.DbConnString)
+	storage, err := db.InitDB(config.DbConnString)
 
 	if err != nil {
 		log.Fatalf("Failed to initialize database: %v\n", err)
@@ -63,9 +63,9 @@ func main() {
 
 	// Create a new API instance
 
-	email := utils.NewEmailClient(config.ResendApiKey)
+	email := services.NewEmailClient(config.ResendApiKey)
 
-	app := api.New(&storage, email, config.JWTSecret)
+	app := api.New(storage, email, config.JWTSecret)
 
 	app.RegisterRoutes(r)
 

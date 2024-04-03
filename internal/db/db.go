@@ -7,11 +7,15 @@ import (
 	_ "github.com/lib/pq"
 )
 
-// Init initializes a new database connection.
-func Init(connStr string) (Storage, error) {
+type storage struct {
+	pg *sqlx.DB
+}
+
+// InitDB initializes a new database connection.
+func InitDB(connStr string) (*storage, error) {
 	db, err := sqlx.Connect("postgres", connStr)
 	if err != nil {
-		return Storage{}, err
+		return nil, err
 	}
 
 	db.SetConnMaxLifetime(60)
@@ -21,11 +25,11 @@ func Init(connStr string) (Storage, error) {
 
 	log.Println("Database connection established")
 
-	return Storage{pg: db}, nil
+	return &storage{pg: db}, nil
 }
 
 // Close closes the database connection.
-func (s *Storage) Close() {
+func (s *storage) Close() {
 	if s.pg != nil {
 		err := s.pg.Close()
 		if err != nil {
@@ -36,6 +40,6 @@ func (s *Storage) Close() {
 	}
 }
 
-func (s *Storage) Ping() error {
+func (s *storage) Ping() error {
 	return s.pg.Ping()
 }

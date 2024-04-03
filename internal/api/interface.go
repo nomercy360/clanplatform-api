@@ -1,6 +1,9 @@
 package api
 
-import "clanplatform/internal/entity"
+import (
+	"clanplatform/internal/entity"
+	"clanplatform/internal/services"
+)
 
 type storage interface {
 	ListUsers() ([]entity.User, error)
@@ -28,4 +31,8 @@ type storage interface {
 
 	ListProducts() ([]entity.Product, error)
 	CreateProductVariant(productID int64, title string, priceList []entity.Price, inventory int) (entity.ProductVariant, error)
+}
+
+type emailService interface {
+	SendEmail(message *services.MailMessage) error
 }

@@ -2,14 +2,9 @@ package db
 
 import (
 	"clanplatform/internal/entity"
-	"github.com/jmoiron/sqlx"
 )
 
-type Storage struct {
-	pg *sqlx.DB
-}
-
-func (s *Storage) ListUsers() ([]entity.User, error) {
+func (s *storage) ListUsers() ([]entity.User, error) {
 	users := make([]entity.User, 0)
 
 	err := s.pg.Select(&users, "SELECT * FROM users")
@@ -21,7 +16,7 @@ func (s *Storage) ListUsers() ([]entity.User, error) {
 	return users, nil
 }
 
-func (s *Storage) CreateUser(user entity.User) (entity.User, error) {
+func (s *storage) CreateUser(user entity.User) (entity.User, error) {
 	query := `
 		INSERT INTO users (email, password_hash, first_name, last_name, role)
 		VALUES (:email, :password_hash, :first_name, :last_name, :role);
@@ -36,7 +31,7 @@ func (s *Storage) CreateUser(user entity.User) (entity.User, error) {
 	return user, nil
 }
 
-func (s *Storage) GetUserByEmail(email string) (entity.User, error) {
+func (s *storage) GetUserByEmail(email string) (entity.User, error) {
 	var user entity.User
 
 	err := s.pg.Get(&user, "SELECT * FROM users WHERE email = $1", email)

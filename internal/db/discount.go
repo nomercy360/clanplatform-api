@@ -4,7 +4,7 @@ import (
 	"clanplatform/internal/entity"
 )
 
-func (s *Storage) CreateDiscount(discount entity.Discount) (entity.Discount, error) {
+func (s *storage) CreateDiscount(discount entity.Discount) (entity.Discount, error) {
 	query := `
 		INSERT INTO discounts (code, is_active, type, usage_limit, ends_at, value, starts_at)
 		VALUES (:code, :is_active, :type, :usage_limit, :ends_at, :value, :starts_at)
@@ -29,7 +29,7 @@ func (s *Storage) CreateDiscount(discount entity.Discount) (entity.Discount, err
 	return discount, nil
 }
 
-func (s *Storage) GetDiscounts() ([]entity.Discount, error) {
+func (s *storage) GetDiscounts() ([]entity.Discount, error) {
 	discounts := make([]entity.Discount, 0)
 	err := s.pg.Select(&discounts, "SELECT * FROM discounts")
 	if err != nil {
@@ -38,7 +38,7 @@ func (s *Storage) GetDiscounts() ([]entity.Discount, error) {
 	return discounts, nil
 }
 
-func (s *Storage) UpdateDiscount(discount entity.Discount) (entity.Discount, error) {
+func (s *storage) UpdateDiscount(discount entity.Discount) (entity.Discount, error) {
 	query := `
 		UPDATE discounts
 		SET code = :code, is_active = :is_active, value = :value, type = :type, usage_limit = :usage_limit, starts_at = :starts_at, ends_at = :ends_at
@@ -64,7 +64,7 @@ func (s *Storage) UpdateDiscount(discount entity.Discount) (entity.Discount, err
 	return discount, nil
 }
 
-func (s *Storage) DeleteDiscount(id string) error {
+func (s *storage) DeleteDiscount(id string) error {
 	query := `
 		DELETE FROM discounts
 		WHERE id = $1;

@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func (s *Storage) InviteUser(token string, email string, role entity.UserRoleEnum) error {
+func (s *storage) InviteUser(token string, email string, role entity.UserRoleEnum) error {
 	invite := entity.Invite{
 		Token:     token,
 		Email:     email,
@@ -22,7 +22,7 @@ func (s *Storage) InviteUser(token string, email string, role entity.UserRoleEnu
 	return nil
 }
 
-func (s *Storage) ListInvites() ([]entity.Invite, error) {
+func (s *storage) ListInvites() ([]entity.Invite, error) {
 	var invites []entity.Invite
 
 	err := s.pg.Select(&invites, "SELECT * FROM invites")
@@ -34,7 +34,7 @@ func (s *Storage) ListInvites() ([]entity.Invite, error) {
 	return invites, nil
 }
 
-func (s *Storage) GetInviteByEmail(email string) (*entity.Invite, error) {
+func (s *storage) GetInviteByEmail(email string) (*entity.Invite, error) {
 	var invite entity.Invite
 
 	err := s.pg.Get(&invite, "SELECT * FROM invites WHERE email = $1", email)

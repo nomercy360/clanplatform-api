@@ -1,7 +1,7 @@
 package api
 
 import (
-	"clanplatform/internal/utils"
+	"clanplatform/internal/services"
 	"encoding/json"
 	"github.com/go-chi/chi/v5"
 	"net/http"
@@ -16,11 +16,11 @@ type SMTPConfig struct {
 
 type api struct {
 	storage   storage
-	email     *utils.EmailClient
+	email     emailService
 	jwtSecret string
 }
 
-func New(storage storage, email *utils.EmailClient, jwtSecret string) *api {
+func New(storage storage, email *services.EmailClient, jwtSecret string) *api {
 	return &api{storage: storage, email: email, jwtSecret: jwtSecret}
 }
 

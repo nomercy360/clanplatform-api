@@ -4,7 +4,7 @@ import (
 	"clanplatform/internal/entity"
 )
 
-func (s *Storage) ListProducts() ([]entity.Product, error) {
+func (s *storage) ListProducts() ([]entity.Product, error) {
 	products := make([]entity.Product, 0)
 	err := s.pg.Select(&products, "SELECT * FROM products")
 
@@ -15,7 +15,7 @@ func (s *Storage) ListProducts() ([]entity.Product, error) {
 	return products, nil
 }
 
-func (s *Storage) CreateProduct(title string, subtitle string, description string, handle string) (entity.Product, error) {
+func (s *storage) CreateProduct(title string, subtitle string, description string, handle string) (entity.Product, error) {
 	query := `
 		INSERT INTO products (title, subtitle, description, handle, is_published) 
 		VALUES (:title, :subtitle, :description, :handle, :is_published)
@@ -48,7 +48,7 @@ func (s *Storage) CreateProduct(title string, subtitle string, description strin
 	return result, nil
 }
 
-func (s *Storage) CreateProductVariant(
+func (s *storage) CreateProductVariant(
 	productID int64,
 	title string,
 	priceList []entity.Price,
