@@ -1,4 +1,4 @@
-package api
+package transport
 
 import (
 	"encoding/json"
@@ -7,8 +7,8 @@ import (
 	"strconv"
 )
 
-func (api *api) ListCollections(w http.ResponseWriter, r *http.Request) {
-	collections, err := api.storage.ListCollections()
+func (tr *transport) ListCollectionsHandler(w http.ResponseWriter, r *http.Request) {
+	collections, err := tr.admin.ListCollections()
 
 	if err != nil {
 		_ = WriteError(w, http.StatusInternalServerError, err.Error())
@@ -18,7 +18,7 @@ func (api *api) ListCollections(w http.ResponseWriter, r *http.Request) {
 	_ = WriteJSON(w, http.StatusOK, collections)
 }
 
-func (api *api) CreateCollection(w http.ResponseWriter, r *http.Request) {
+func (tr *transport) CreateCollectionHandler(w http.ResponseWriter, r *http.Request) {
 	var data struct {
 		Title  string `json:"title"`
 		Handle string `json:"handle"`
@@ -29,12 +29,7 @@ func (api *api) CreateCollection(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if data.Title == "" || data.Handle == "" {
-		_ = WriteError(w, http.StatusBadRequest, "missing required fields")
-		return
-	}
-
-	collection, err := api.storage.CreateCollection(data.Title, data.Handle)
+	collection, err := tr.admin.CreateCollection(data.Title, data.Handle)
 
 	if err != nil {
 		_ = WriteError(w, http.StatusInternalServerError, err.Error())
@@ -44,14 +39,15 @@ func (api *api) CreateCollection(w http.ResponseWriter, r *http.Request) {
 	_ = WriteJSON(w, http.StatusCreated, collection)
 }
 
-func (api *api) GetCollection(w http.ResponseWriter, r *http.Request) {
+func (tr *transport) GetCollectionByIDHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+
 	if err != nil {
 		_ = WriteError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	collection, err := api.storage.GetCollectionByID(id)
+	collection, err := tr.admin.GetCollectionByID(id)
 
 	if err != nil {
 		_ = WriteError(w, http.StatusInternalServerError, err.Error())
@@ -61,7 +57,7 @@ func (api *api) GetCollection(w http.ResponseWriter, r *http.Request) {
 	_ = WriteJSON(w, http.StatusOK, collection)
 }
 
-func (api *api) UpdateCollection(w http.ResponseWriter, r *http.Request) {
+func (tr *transport) UpdateCollectionHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
 		_ = WriteError(w, http.StatusBadRequest, err.Error())
@@ -73,29 +69,29 @@ func (api *api) UpdateCollection(w http.ResponseWriter, r *http.Request) {
 		Handle *string `json:"handle"`
 	}
 
-	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+	if err = json.NewDecoder(r.Body).Decode(&data); err != nil {
 		_ = WriteError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	collection, err := api.storage.UpdateCollection(data.Title, data.Handle, id)
+	res, err := tr.admin.UpdateCollection(data.Title, data.Handle, id)
 
 	if err != nil {
 		_ = WriteError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	_ = WriteJSON(w, http.StatusOK, collection)
+	_ = WriteJSON(w, http.StatusOK, res)
 }
 
-func (api *api) DeleteCollection(w http.ResponseWriter, r *http.Request) {
+func (tr *transport) DeleteCollectionHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
 		_ = WriteError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	err = api.storage.DeleteCollection(id)
+	err = tr.admin.DeleteCollection(id)
 
 	if err != nil {
 		_ = WriteError(w, http.StatusInternalServerError, err.Error())
@@ -105,7 +101,7 @@ func (api *api) DeleteCollection(w http.ResponseWriter, r *http.Request) {
 	_ = WriteJSON(w, http.StatusOK, nil)
 }
 
-func (api *api) AddProductsToCollection(w http.ResponseWriter, r *http.Request) {
+func (tr *transport) AddProductsToCollectionHandler(w http.ResponseWriter, r *http.Request) {
 	collectionID, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
 		_ = WriteError(w, http.StatusBadRequest, err.Error())
@@ -121,12 +117,7 @@ func (api *api) AddProductsToCollection(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	if len(data.ProductIDs) == 0 {
-		_ = WriteError(w, http.StatusBadRequest, "missing required fields")
-		return
-	}
-
-	err = api.storage.AddProductsToCollection(collectionID, data.ProductIDs)
+	err = tr.admin.AddProductsToCollection(collectionID, data.ProductIDs)
 
 	if err != nil {
 		_ = WriteError(w, http.StatusInternalServerError, err.Error())
@@ -136,7 +127,7 @@ func (api *api) AddProductsToCollection(w http.ResponseWriter, r *http.Request) 
 	w.WriteHeader(http.StatusOK)
 }
 
-func (api *api) RemoveProductsFromCollection(w http.ResponseWriter, r *http.Request) {
+func (tr *transport) RemoveProductsFromCollectionHandler(w http.ResponseWriter, r *http.Request) {
 	collectionID, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
 		_ = WriteError(w, http.StatusBadRequest, err.Error())
@@ -152,12 +143,7 @@ func (api *api) RemoveProductsFromCollection(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	if len(data.ProductIDs) == 0 {
-		_ = WriteError(w, http.StatusBadRequest, "missing required fields")
-		return
-	}
-
-	err = api.storage.RemoveProductsFromCollection(collectionID, data.ProductIDs)
+	err = tr.admin.RemoveProductsFromCollection(collectionID, data.ProductIDs)
 
 	if err != nil {
 		_ = WriteError(w, http.StatusInternalServerError, err.Error())

@@ -1,9 +1,10 @@
 package main
 
 import (
-	"clanplatform/internal/api"
+	admSvc "clanplatform/internal/admin"
 	"clanplatform/internal/db"
 	"clanplatform/internal/services"
+	"clanplatform/internal/transport"
 	"flag"
 	"github.com/go-chi/chi/v5"
 	"gopkg.in/yaml.v3"
@@ -65,7 +66,9 @@ func main() {
 
 	email := services.NewEmailClient(config.ResendApiKey)
 
-	app := api.New(storage, email, config.JWTSecret)
+	admin := admSvc.NewAdmin(storage, email)
+
+	app := transport.New(admin, config.JWTSecret)
 
 	app.RegisterRoutes(r)
 

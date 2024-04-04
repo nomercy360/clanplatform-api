@@ -1,10 +1,25 @@
 package db
 
-import (
-	"clanplatform/internal/entity"
-)
+import "time"
 
-func (s *storage) CreateDiscount(discount entity.Discount) (entity.Discount, error) {
+type Discount struct {
+	ID         int64            `db:"id" json:"id"`
+	Code       string           `db:"code" json:"code"`
+	IsActive   bool             `db:"is_active" json:"is_active"`
+	Type       DiscountTypeEnum `db:"type" json:"type"`
+	UsageLimit int              `db:"usage_limit" json:"usage_limit"`
+	UsageCount int              `db:"usage_count" json:"usage_count"`
+	StartsAt   time.Time        `db:"starts_at" json:"starts_at"`
+	EndsAt     *time.Time       `db:"ends_at" json:"ends_at"`
+	CreatedAt  time.Time        `db:"created_at" json:"created_at"`
+	UpdatedAt  time.Time        `db:"updated_at" json:"updated_at"`
+	DeletedAt  *time.Time       `db:"deleted_at" json:"deleted_at"`
+	Value      int              `db:"value" json:"value"`
+}
+
+func (s *storage) CreateDiscount(discount Discount) (*Discount, error) {
+	var res Discount
+
 	query := `
 		INSERT INTO discounts (code, is_active, type, usage_limit, ends_at, value, starts_at)
 		VALUES (:code, :is_active, :type, :usage_limit, :ends_at, :value, :starts_at)
@@ -14,23 +29,23 @@ func (s *storage) CreateDiscount(discount entity.Discount) (entity.Discount, err
 	rows, err := s.pg.NamedQuery(query, discount)
 
 	if err != nil {
-		return entity.Discount{}, err
+		return nil, err
 	}
 
 	defer rows.Close()
 
 	if rows.Next() {
-		err = rows.StructScan(&discount)
+		err = rows.StructScan(&res)
 		if err != nil {
-			return entity.Discount{}, err
+			return nil, err
 		}
 	}
 
-	return discount, nil
+	return &res, nil
 }
 
-func (s *storage) GetDiscounts() ([]entity.Discount, error) {
-	discounts := make([]entity.Discount, 0)
+func (s *storage) ListDiscounts() ([]Discount, error) {
+	discounts := make([]Discount, 0)
 	err := s.pg.Select(&discounts, "SELECT * FROM discounts")
 	if err != nil {
 		return nil, err
@@ -38,7 +53,9 @@ func (s *storage) GetDiscounts() ([]entity.Discount, error) {
 	return discounts, nil
 }
 
-func (s *storage) UpdateDiscount(discount entity.Discount) (entity.Discount, error) {
+func (s *storage) UpdateDiscount(discount Discount) (*Discount, error) {
+	var res Discount
+
 	query := `
 		UPDATE discounts
 		SET code = :code, is_active = :is_active, value = :value, type = :type, usage_limit = :usage_limit, starts_at = :starts_at, ends_at = :ends_at
@@ -49,19 +66,19 @@ func (s *storage) UpdateDiscount(discount entity.Discount) (entity.Discount, err
 	rows, err := s.pg.NamedQuery(query, discount)
 
 	if err != nil {
-		return entity.Discount{}, err
+		return nil, err
 	}
 
 	defer rows.Close()
 
 	if rows.Next() {
-		err = rows.StructScan(&discount)
+		err = rows.StructScan(&res)
 		if err != nil {
-			return entity.Discount{}, err
+			return nil, err
 		}
 	}
 
-	return discount, nil
+	return &res, nil
 }
 
 func (s *storage) DeleteDiscount(id string) error {
@@ -77,7 +94,7 @@ func (s *storage) DeleteDiscount(id string) error {
 	}
 
 	if rowsAffected, _ := res.RowsAffected(); rowsAffected == 0 {
-		return entity.ErrNotFound
+		return ErrNotFound
 	}
 
 	return nil

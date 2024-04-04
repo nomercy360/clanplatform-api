@@ -1,12 +1,23 @@
 package db
 
 import (
-	"clanplatform/internal/entity"
 	"time"
 )
 
-func (s *storage) InviteUser(token string, email string, role entity.UserRoleEnum) error {
-	invite := entity.Invite{
+type Invite struct {
+	ID        int64        `db:"id"`
+	Email     string       `db:"email"`
+	Role      UserRoleEnum `db:"role"`
+	CreatedAt time.Time    `db:"created_at"`
+	UpdatedAt time.Time    `db:"updated_at"`
+	ExpiresAt time.Time    `db:"expires_at"`
+	Accepted  bool         `db:"accepted"`
+	DeletedAt *time.Time   `db:"deleted_at"`
+	Token     string       `db:"token"`
+}
+
+func (s *storage) InviteUser(token string, email string, role UserRoleEnum) error {
+	invite := Invite{
 		Token:     token,
 		Email:     email,
 		ExpiresAt: time.Now().Add(time.Hour * 24 * 7),
@@ -22,8 +33,8 @@ func (s *storage) InviteUser(token string, email string, role entity.UserRoleEnu
 	return nil
 }
 
-func (s *storage) ListInvites() ([]entity.Invite, error) {
-	var invites []entity.Invite
+func (s *storage) ListInvites() ([]Invite, error) {
+	invites := make([]Invite, 0)
 
 	err := s.pg.Select(&invites, "SELECT * FROM invites")
 
@@ -34,8 +45,8 @@ func (s *storage) ListInvites() ([]entity.Invite, error) {
 	return invites, nil
 }
 
-func (s *storage) GetInviteByEmail(email string) (*entity.Invite, error) {
-	var invite entity.Invite
+func (s *storage) GetInviteByEmail(email string) (*Invite, error) {
+	var invite Invite
 
 	err := s.pg.Get(&invite, "SELECT * FROM invites WHERE email = $1", email)
 

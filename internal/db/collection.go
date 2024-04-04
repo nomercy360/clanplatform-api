@@ -1,14 +1,13 @@
 package db
 
 import (
-	"clanplatform/internal/entity"
 	"fmt"
 	"github.com/jmoiron/sqlx"
 	"strings"
 )
 
-func (s *storage) ListCollections() ([]entity.ProductCollection, error) {
-	collections := make([]entity.ProductCollection, 0)
+func (s *storage) ListCollections() ([]ProductCollection, error) {
+	collections := make([]ProductCollection, 0)
 
 	if err := s.pg.Select(&collections, "SELECT * FROM product_collections"); err != nil {
 		return nil, err
@@ -17,14 +16,14 @@ func (s *storage) ListCollections() ([]entity.ProductCollection, error) {
 	return collections, nil
 }
 
-func (s *storage) CreateCollection(title string, handle string) (entity.ProductCollection, error) {
+func (s *storage) CreateCollection(title string, handle string) (*ProductCollection, error) {
 	query := `
 		INSERT INTO product_collections (title, handle)
 		VALUES (:title, :handle)
 		RETURNING *;
 	`
 
-	collection := entity.ProductCollection{
+	collection := &ProductCollection{
 		Title:  title,
 		Handle: handle,
 	}
@@ -32,7 +31,7 @@ func (s *storage) CreateCollection(title string, handle string) (entity.ProductC
 	rows, err := s.pg.NamedQuery(query, collection)
 
 	if err != nil {
-		return entity.ProductCollection{}, entity.ErrDatabase
+		return nil, err
 	}
 
 	defer rows.Close()
@@ -40,26 +39,27 @@ func (s *storage) CreateCollection(title string, handle string) (entity.ProductC
 	if rows.Next() {
 		err = rows.StructScan(&collection)
 		if err != nil {
-			return entity.ProductCollection{}, entity.ErrDatabase
+			return nil, err
 		}
 	}
 
 	return collection, nil
 }
 
-func (s *storage) GetCollectionByID(id int64) (entity.ProductCollection, error) {
-	collection := entity.ProductCollection{}
+func (s *storage) GetCollectionByID(id int64) (*ProductCollection, error) {
+	var collection *ProductCollection
+
 	err := s.pg.Get(&collection, "SELECT * FROM product_collections WHERE id = $1", id)
 
 	if err != nil {
-		return entity.ProductCollection{}, err
+		return nil, err
 	}
 
 	return collection, nil
 }
 
-func (s *storage) UpdateCollection(title *string, handle *string, id int64) (entity.ProductCollection, error) {
-	var res entity.ProductCollection
+func (s *storage) UpdateCollection(title *string, handle *string, id int64) (*ProductCollection, error) {
+	var res *ProductCollection
 
 	var updates []string
 	params := map[string]interface{}{

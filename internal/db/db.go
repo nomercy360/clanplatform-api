@@ -1,6 +1,7 @@
 package db
 
 import (
+	"errors"
 	"log"
 
 	"github.com/jmoiron/sqlx"
@@ -43,3 +44,8 @@ func (s *storage) Close() {
 func (s *storage) Ping() error {
 	return s.pg.Ping()
 }
+
+var (
+	ErrNotFound      = errors.New("not found")
+	ErrAlreadyExists = errors.New("already exists")
+)
