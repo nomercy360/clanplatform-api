@@ -33,7 +33,7 @@ type admin interface {
 	InviteUser(role, email string) error
 	GetUserByEmail(email string) (*db.User, error)
 
-	CreateDiscount(discount db.Discount) (*db.Discount, error)
+	CreateDiscount(cd adm.CreateDiscount) (*db.Discount, error)
 	ListDiscounts() ([]db.Discount, error)
 	UpdateDiscount(discount db.Discount) (*db.Discount, error)
 	DeleteDiscount(id string) error

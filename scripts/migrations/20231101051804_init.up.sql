@@ -151,7 +151,7 @@ CREATE TABLE discounts
     code        VARCHAR(255)             NOT NULL,
     is_active   BOOLEAN                  NOT NULL DEFAULT FALSE,
     type        discount_type_enum       NOT NULL,
-    usage_limit INT4                     NOT NULL DEFAULT 1,
+    usage_limit INT4                     NOT NULL DEFAULT 0,
     usage_count INT4                     NOT NULL DEFAULT 0,
     value       INT4                     NOT NULL,
     starts_at   TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
@@ -160,6 +160,9 @@ CREATE TABLE discounts
     updated_at  TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     deleted_at  TIMESTAMP WITH TIME ZONE
 );
+
+CREATE UNIQUE INDEX idx_discounts_code
+    ON discounts (code);
 
 CREATE TABLE payment_providers
 (

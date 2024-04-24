@@ -1,7 +1,7 @@
 package transport
 
 import (
-	"clanplatform/internal/db"
+	adm "clanplatform/internal/admin"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -17,16 +17,20 @@ func (tr *transport) ListDiscountsHandler(c echo.Context) error {
 }
 
 func (tr *transport) CreateDiscountHandler(c echo.Context) error {
-	var discount db.Discount
+	var discount adm.CreateDiscount
 
 	if err := c.Bind(&discount); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
+	if err := c.Validate(discount); err != nil {
+		return err
+	}
+
 	res, err := tr.admin.CreateDiscount(discount)
 
 	if err != nil {
-		return WriteError(c.Response(), http.StatusInternalServerError, err.Error())
+		return err
 	}
 
 	return c.JSON(http.StatusOK, res)

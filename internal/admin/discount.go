@@ -2,6 +2,7 @@ package admin
 
 import (
 	"clanplatform/internal/db"
+	"clanplatform/internal/terrors"
 	"time"
 )
 
@@ -15,26 +16,36 @@ func (adm *admin) ListDiscounts() ([]db.Discount, error) {
 	return disc, nil
 }
 
-func (adm *admin) CreateDiscount(discount db.Discount) (*db.Discount, error) {
-	if discount.Code == "" {
-		return nil, invalidReqErr
+type CreateDiscount struct {
+	Code       string    `json:"code" validate:"required"`
+	Type       string    `json:"type" validate:"required,oneof=percentage fixed free_shipping"`
+	Value      int       `json:"value" validate:"required,min=1"`
+	StartsAt   time.Time `json:"starts_at"`
+	UsageLimit int       `json:"usage_limit" validate:"omitempty,min=1"`
+}
+
+func (cd CreateDiscount) toDiscount() db.Discount {
+	return db.Discount{
+		Code:       cd.Code,
+		Type:       cd.Type,
+		Value:      cd.Value,
+		StartsAt:   cd.StartsAt,
+		UsageLimit: cd.UsageLimit,
+	}
+}
+
+func (adm *admin) CreateDiscount(cd CreateDiscount) (*db.Discount, error) {
+	if cd.StartsAt.IsZero() {
+		cd.StartsAt = time.Now()
 	}
 
-	if discount.Value <= 0 {
-		return nil, invalidReqErr
-	}
-
-	if discount.Type != db.Percentage && discount.Type != db.Fixed {
-		return nil, invalidReqErr
-	}
-
-	if discount.StartsAt.IsZero() {
-		discount.StartsAt = time.Now()
-	}
-
-	res, err := adm.storage.CreateDiscount(discount)
+	res, err := adm.storage.CreateDiscount(cd.toDiscount())
 
 	if err != nil {
+		if db.IsDuplicationError(err) {
+			return nil, terrors.BadRequest(err)
+		}
+
 		return nil, err
 	}
 
@@ -42,22 +53,6 @@ func (adm *admin) CreateDiscount(discount db.Discount) (*db.Discount, error) {
 }
 
 func (adm *admin) UpdateDiscount(discount db.Discount) (*db.Discount, error) {
-	if discount.ID == 0 {
-		return nil, invalidReqErr
-	}
-
-	if discount.Code == "" {
-		return nil, invalidReqErr
-	}
-
-	if discount.Value <= 0 {
-		return nil, invalidReqErr
-	}
-
-	if discount.Type != db.Percentage && discount.Type != db.Fixed {
-		return nil, invalidReqErr
-	}
-
 	res, err := adm.storage.UpdateDiscount(discount)
 
 	if err != nil {

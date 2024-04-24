@@ -21,3 +21,11 @@ func NotFound(err error) *Error {
 		Message: "not found",
 	}
 }
+
+func BadRequest(err error) *Error {
+	return &Error{
+		Code:    http.StatusBadRequest,
+		E:       err,
+		Message: "bad request",
+	}
+}

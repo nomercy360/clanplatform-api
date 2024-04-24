@@ -3,18 +3,18 @@ package db
 import "time"
 
 type Discount struct {
-	ID         int64            `db:"id" json:"id"`
-	Code       string           `db:"code" json:"code"`
-	IsActive   bool             `db:"is_active" json:"is_active"`
-	Type       DiscountTypeEnum `db:"type" json:"type"`
-	UsageLimit int              `db:"usage_limit" json:"usage_limit"`
-	UsageCount int              `db:"usage_count" json:"usage_count"`
-	StartsAt   time.Time        `db:"starts_at" json:"starts_at"`
-	EndsAt     *time.Time       `db:"ends_at" json:"ends_at"`
-	CreatedAt  time.Time        `db:"created_at" json:"created_at"`
-	UpdatedAt  time.Time        `db:"updated_at" json:"updated_at"`
-	DeletedAt  *time.Time       `db:"deleted_at" json:"deleted_at"`
-	Value      int              `db:"value" json:"value"`
+	ID         int64      `db:"id" json:"id"`
+	Code       string     `db:"code" json:"code"`
+	IsActive   bool       `db:"is_active" json:"is_active"`
+	Type       string     `db:"type" json:"type"`
+	UsageLimit int        `db:"usage_limit" json:"usage_limit"`
+	UsageCount int        `db:"usage_count" json:"usage_count"`
+	StartsAt   time.Time  `db:"starts_at" json:"starts_at"`
+	EndsAt     *time.Time `db:"ends_at" json:"ends_at"`
+	CreatedAt  time.Time  `db:"created_at" json:"created_at"`
+	UpdatedAt  time.Time  `db:"updated_at" json:"updated_at"`
+	DeletedAt  *time.Time `db:"deleted_at" json:"deleted_at"`
+	Value      int        `db:"value" json:"value"`
 }
 
 func (s *Storage) CreateDiscount(discount Discount) (*Discount, error) {
@@ -23,7 +23,7 @@ func (s *Storage) CreateDiscount(discount Discount) (*Discount, error) {
 	query := `
 		INSERT INTO discounts (code, is_active, type, usage_limit, ends_at, value, starts_at)
 		VALUES (:code, :is_active, :type, :usage_limit, :ends_at, :value, :starts_at)
-		RETURNING *;
+		RETURNING id, code, is_active, type, usage_limit, usage_count, starts_at, ends_at, created_at, updated_at, deleted_at, value;
 	`
 
 	rows, err := s.pg.NamedQuery(query, discount)
