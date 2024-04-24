@@ -2,34 +2,32 @@ package transport
 
 import (
 	"clanplatform/internal/db"
-	"encoding/json"
+	"github.com/labstack/echo/v4"
 	"net/http"
 )
 
-func (tr *transport) ListDiscountsHandler(w http.ResponseWriter, r *http.Request) {
+func (tr *transport) ListDiscountsHandler(c echo.Context) error {
 	discounts, err := tr.admin.ListDiscounts()
 
 	if err != nil {
-		_ = WriteError(w, http.StatusInternalServerError, err.Error())
-		return
+		return WriteError(c.Response(), http.StatusInternalServerError, err.Error())
 	}
 
-	_ = WriteJSON(w, http.StatusOK, discounts)
+	return c.JSON(http.StatusOK, discounts)
 }
 
-func (tr *transport) CreateDiscountHandler(w http.ResponseWriter, r *http.Request) {
+func (tr *transport) CreateDiscountHandler(c echo.Context) error {
 	var discount db.Discount
-	if err := json.NewDecoder(r.Body).Decode(&discount); err != nil {
-		_ = WriteError(w, http.StatusBadRequest, err.Error())
-		return
+
+	if err := c.Bind(&discount); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	res, err := tr.admin.CreateDiscount(discount)
 
 	if err != nil {
-		_ = WriteError(w, http.StatusInternalServerError, err.Error())
-		return
+		return WriteError(c.Response(), http.StatusInternalServerError, err.Error())
 	}
 
-	_ = WriteJSON(w, http.StatusCreated, res)
+	return c.JSON(http.StatusOK, res)
 }

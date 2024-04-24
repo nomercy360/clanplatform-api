@@ -5,23 +5,21 @@ import (
 )
 
 type Invite struct {
-	ID        int64        `db:"id"`
-	Email     string       `db:"email"`
-	Role      UserRoleEnum `db:"role"`
-	CreatedAt time.Time    `db:"created_at"`
-	UpdatedAt time.Time    `db:"updated_at"`
-	ExpiresAt time.Time    `db:"expires_at"`
-	Accepted  bool         `db:"accepted"`
-	DeletedAt *time.Time   `db:"deleted_at"`
-	Token     string       `db:"token"`
+	ID        int64      `db:"id"`
+	Email     string     `db:"email"`
+	CreatedAt time.Time  `db:"created_at"`
+	UpdatedAt time.Time  `db:"updated_at"`
+	ExpiresAt time.Time  `db:"expires_at"`
+	Accepted  bool       `db:"accepted"`
+	DeletedAt *time.Time `db:"deleted_at"`
+	Token     string     `db:"token"`
 }
 
-func (s *storage) InviteUser(token string, email string, role UserRoleEnum) error {
+func (s *Storage) InviteUser(token string, email string) error {
 	invite := Invite{
 		Token:     token,
 		Email:     email,
 		ExpiresAt: time.Now().Add(time.Hour * 24 * 7),
-		Role:      role,
 	}
 
 	_, err := s.pg.NamedExec("INSERT INTO invites (email, role, expires_at, token) VALUES (:email, :role, :expires_at, :token)", invite)
@@ -33,7 +31,7 @@ func (s *storage) InviteUser(token string, email string, role UserRoleEnum) erro
 	return nil
 }
 
-func (s *storage) ListInvites() ([]Invite, error) {
+func (s *Storage) ListInvites() ([]Invite, error) {
 	invites := make([]Invite, 0)
 
 	err := s.pg.Select(&invites, "SELECT * FROM invites")
@@ -45,7 +43,7 @@ func (s *storage) ListInvites() ([]Invite, error) {
 	return invites, nil
 }
 
-func (s *storage) GetInviteByEmail(email string) (*Invite, error) {
+func (s *Storage) GetInviteByEmail(email string) (*Invite, error) {
 	var invite Invite
 
 	err := s.pg.Get(&invite, "SELECT * FROM invites WHERE email = $1", email)

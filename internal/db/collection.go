@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func (s *storage) ListCollections() ([]ProductCollection, error) {
+func (s *Storage) ListCollections() ([]ProductCollection, error) {
 	collections := make([]ProductCollection, 0)
 
 	if err := s.pg.Select(&collections, "SELECT * FROM product_collections"); err != nil {
@@ -16,7 +16,7 @@ func (s *storage) ListCollections() ([]ProductCollection, error) {
 	return collections, nil
 }
 
-func (s *storage) CreateCollection(title string, handle string) (*ProductCollection, error) {
+func (s *Storage) CreateCollection(title string, handle string) (*ProductCollection, error) {
 	query := `
 		INSERT INTO product_collections (title, handle)
 		VALUES (:title, :handle)
@@ -46,7 +46,7 @@ func (s *storage) CreateCollection(title string, handle string) (*ProductCollect
 	return collection, nil
 }
 
-func (s *storage) GetCollectionByID(id int64) (*ProductCollection, error) {
+func (s *Storage) GetCollectionByID(id int64) (*ProductCollection, error) {
 	var collection *ProductCollection
 
 	err := s.pg.Get(&collection, "SELECT * FROM product_collections WHERE id = $1", id)
@@ -58,7 +58,7 @@ func (s *storage) GetCollectionByID(id int64) (*ProductCollection, error) {
 	return collection, nil
 }
 
-func (s *storage) UpdateCollection(title *string, handle *string, id int64) (*ProductCollection, error) {
+func (s *Storage) UpdateCollection(title *string, handle *string, id int64) (*ProductCollection, error) {
 	var res *ProductCollection
 
 	var updates []string
@@ -101,7 +101,7 @@ func (s *storage) UpdateCollection(title *string, handle *string, id int64) (*Pr
 	return res, nil
 }
 
-func (s *storage) DeleteCollection(id int64) error {
+func (s *Storage) DeleteCollection(id int64) error {
 	_, err := s.pg.Exec("DELETE FROM product_collections WHERE id = $1", id)
 
 	if err != nil {
@@ -111,7 +111,7 @@ func (s *storage) DeleteCollection(id int64) error {
 	return nil
 }
 
-func (s *storage) AddProductsToCollection(collectionID int64, productIDs []int64) error {
+func (s *Storage) AddProductsToCollection(collectionID int64, productIDs []int64) error {
 	query, args, err := sqlx.In(`
 		UPDATE products
 		SET collection_id = ?
@@ -133,7 +133,7 @@ func (s *storage) AddProductsToCollection(collectionID int64, productIDs []int64
 	return nil
 }
 
-func (s *storage) RemoveProductsFromCollection(collectionID int64, productIDs []int64) error {
+func (s *Storage) RemoveProductsFromCollection(collectionID int64, productIDs []int64) error {
 	query, args, err := sqlx.In(`
 		UPDATE products
 		SET collection_id = NULL

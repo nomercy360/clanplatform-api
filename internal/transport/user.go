@@ -1,70 +1,86 @@
 package transport
 
 import (
-	"encoding/json"
+	adm "clanplatform/internal/admin"
+	"github.com/labstack/echo/v4"
 	"net/http"
 	"time"
 )
 
-func (tr *transport) ListUsersHandler(w http.ResponseWriter, r *http.Request) {
+func (tr *transport) ListUsersHandler(c echo.Context) error {
 	users, err := tr.admin.ListUsers()
 
 	if err != nil {
-		_ = WriteError(w, http.StatusInternalServerError, err.Error())
-		return
+		return WriteError(c.Response(), http.StatusInternalServerError, err.Error())
 	}
 
-	_ = WriteJSON(w, http.StatusOK, users)
+	return c.JSON(http.StatusOK, users)
 }
 
-func decodeCredentials(r *http.Request) (email, password string, err error) {
+func (tr *transport) CreateUserHandler(c echo.Context) error {
+	var data adm.CreateUser
+
+	if err := c.Bind(&data); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	if err := c.Validate(data); err != nil {
+		return err
+	}
+
+	res, err := tr.admin.CreateUser(data)
+
+	if err != nil {
+		return WriteError(c.Response(), http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusCreated, res)
+}
+
+// AuthCookieHandler set cookie and returns user
+func (tr *transport) AuthCookieHandler(c echo.Context) error {
 	var data struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
 	}
-	err = json.NewDecoder(r.Body).Decode(&data)
-	return data.Email, data.Password, err
-}
 
-// AuthCookieHandler set cookie and returns user
-func (tr *transport) AuthCookieHandler(w http.ResponseWriter, r *http.Request) {
-	email, password, err := decodeCredentials(r)
-
-	if err != nil {
-		_ = WriteError(w, http.StatusBadRequest, err.Error())
-		return
+	if err := c.Bind(&data); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	user, err := tr.admin.AuthUser(email, password)
+	user, err := tr.admin.AuthUser(data.Email, data.Password)
 
-	http.SetCookie(w, &http.Cookie{
-		Name:     "clanplatform_token",
-		Value:    user.Token,
-		Expires:  time.Now().Add(time.Hour * 24),
-		HttpOnly: true,
-		SameSite: http.SameSiteStrictMode,
-		Secure:   true,
-		Path:     "/",
-	})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
 
-	_ = WriteJSON(w, http.StatusOK, user)
+	cookie := new(http.Cookie)
+
+	cookie.Name = "token"
+	cookie.Value = user.Token
+	cookie.Expires = time.Now().Add(24 * time.Hour)
+
+	c.SetCookie(cookie)
+
+	return c.JSON(http.StatusOK, user)
 }
 
 // AuthTokenHandler returns jwt token
-func (tr *transport) AuthTokenHandler(w http.ResponseWriter, r *http.Request) {
-	email, password, err := decodeCredentials(r)
-
-	if err != nil {
-		_ = WriteError(w, http.StatusBadRequest, err.Error())
-		return
+func (tr *transport) AuthTokenHandler(c echo.Context) error {
+	var data struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
 	}
 
-	user, err := tr.admin.AuthUser(email, password)
-
-	if err != nil {
-		_ = WriteError(w, http.StatusInternalServerError, err.Error())
-		return
+	if err := c.Bind(&data); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	_ = WriteJSON(w, http.StatusOK, map[string]string{"access_token": user.Token})
+	user, err := tr.admin.AuthUser(data.Email, data.Password)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{"token": user.Token})
 }

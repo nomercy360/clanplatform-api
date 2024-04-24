@@ -8,12 +8,12 @@ import (
 	_ "github.com/lib/pq"
 )
 
-type storage struct {
+type Storage struct {
 	pg *sqlx.DB
 }
 
 // NewDB initializes a new database connection.
-func NewDB(connStr string) (*storage, error) {
+func NewDB(connStr string) (*Storage, error) {
 	db, err := sqlx.Connect("postgres", connStr)
 	if err != nil {
 		return nil, err
@@ -26,11 +26,11 @@ func NewDB(connStr string) (*storage, error) {
 
 	log.Println("Database connection established")
 
-	return &storage{pg: db}, nil
+	return &Storage{pg: db}, nil
 }
 
 // Close closes the database connection.
-func (s *storage) Close() {
+func (s *Storage) Close() {
 	if s.pg != nil {
 		err := s.pg.Close()
 		if err != nil {
@@ -41,7 +41,7 @@ func (s *storage) Close() {
 	}
 }
 
-func (s *storage) Ping() error {
+func (s *Storage) Ping() error {
 	return s.pg.Ping()
 }
 

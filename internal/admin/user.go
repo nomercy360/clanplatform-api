@@ -22,12 +22,6 @@ func (adm *admin) ListUsers() ([]db.User, error) {
 }
 
 func (adm *admin) InviteUser(role, email string) error {
-	roleEnum := db.UserRoleEnum(role)
-
-	if roleEnum != db.Merchant && roleEnum != db.Admin {
-		return invalidReqErr
-	}
-
 	mySigningKey := []byte("secret")
 
 	claims := &jwt.RegisteredClaims{
@@ -40,7 +34,7 @@ func (adm *admin) InviteUser(role, email string) error {
 
 	ss, err := token.SignedString(mySigningKey)
 
-	err = adm.storage.InviteUser(ss, email, roleEnum)
+	err = adm.storage.InviteUser(ss, email)
 
 	if err != nil {
 		return err
@@ -96,8 +90,8 @@ func (adm *admin) ListInvites() ([]db.Invite, error) {
 	return invites, nil
 }
 
-func (adm *admin) AcceptInvite(token, password, firstName, lastName string) error {
-	if token == "" || password == "" || firstName == "" || lastName == "" {
+func (adm *admin) AcceptInvite(token, password, fullName string) error {
+	if token == "" || password == "" {
 		return invalidReqErr
 	}
 
@@ -117,10 +111,6 @@ func (adm *admin) AcceptInvite(token, password, firstName, lastName string) erro
 
 	invite, _ := adm.storage.GetInviteByEmail(email)
 
-	if err != nil {
-		return err
-	}
-
 	if invite == nil {
 		return errors.New("invite not found")
 	}
@@ -130,9 +120,6 @@ func (adm *admin) AcceptInvite(token, password, firstName, lastName string) erro
 	user := db.User{
 		Email:        email,
 		PasswordHash: hashedPassword,
-		FirstName:    firstName,
-		LastName:     lastName,
-		Role:         invite.Role,
 	}
 
 	if _, err = adm.storage.CreateUser(user); err != nil {
@@ -169,7 +156,6 @@ func (adm *admin) AuthUser(email, password string) (*UserWithToken, error) {
 
 	claims := jwt.MapClaims{
 		"email": email,
-		"role":  user.Role,
 		"exp":   time.Now().Add(time.Hour * 24).Unix(),
 	}
 
@@ -185,9 +171,20 @@ func (adm *admin) AuthUser(email, password string) (*UserWithToken, error) {
 	return &userWithToken, nil
 }
 
-func (adm *admin) CreateUser(user db.User) (*db.User, error) {
-	hashedPassword, _ := hashPassword(user.PasswordHash)
-	user.PasswordHash = hashedPassword
+type CreateUser struct {
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required"`
+	FullName string `json:"full_name" validate:"required"`
+}
+
+func (adm *admin) CreateUser(cr CreateUser) (*db.User, error) {
+	hashedPassword, _ := hashPassword(cr.Password)
+
+	user := db.User{
+		Email:        cr.Email,
+		PasswordHash: hashedPassword,
+		FullName:     cr.FullName,
+	}
 
 	createdUser, err := adm.storage.CreateUser(user)
 

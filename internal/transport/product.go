@@ -1,69 +1,93 @@
 package transport
 
 import (
+	admSvc "clanplatform/internal/admin"
 	"clanplatform/internal/db"
-	"encoding/json"
-	"github.com/go-chi/chi/v5"
+	"github.com/labstack/echo/v4"
 	"net/http"
 	"strconv"
 )
 
-func (tr *transport) CreateProductVariantHandler(w http.ResponseWriter, r *http.Request) {
-	var request struct {
-		Title     string `json:"title"`
-		Inventory int    `json:"inventory"`
-	}
-
-	productID, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+func (tr *transport) CreateProductVariantHandler(c echo.Context) error {
+	productID, err := strconv.ParseInt(c.Param("id"), 10, 64)
 
 	if err != nil {
-		_ = WriteError(w, http.StatusBadRequest, err.Error())
-		return
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	if err = json.NewDecoder(r.Body).Decode(&request); err != nil {
-		_ = WriteError(w, http.StatusBadRequest, err.Error())
-		return
+	var productVariant db.ProductVariant
+
+	if err := c.Bind(&productVariant); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	productVariant := db.ProductVariant{
-		ProductID: productID,
-		Title:     request.Title,
-		Inventory: request.Inventory,
+	productVariant.ProductID = productID
+
+	if err := c.Validate(productVariant); err != nil {
+		return err
 	}
 
 	res, err := tr.admin.CreateProductVariant(productVariant)
 
 	if err != nil {
-		_ = WriteError(w, http.StatusInternalServerError, err.Error())
-		return
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	_ = WriteJSON(w, http.StatusCreated, res)
+	return c.JSON(http.StatusCreated, res)
 }
 
-func (tr *transport) ListProductsHandler(w http.ResponseWriter, r *http.Request) {
+func (tr *transport) ListProductsHandler(c echo.Context) error {
 	products, err := tr.admin.ListProducts()
 	if err != nil {
-		_ = WriteError(w, http.StatusInternalServerError, err.Error())
-		return
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	_ = WriteJSON(w, http.StatusOK, products)
+	return c.JSON(http.StatusOK, products)
 }
 
-func (tr *transport) GetProductByIDHandler(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+func (tr *transport) GetProductByIDHandler(c echo.Context) error {
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
-		_ = WriteError(w, http.StatusBadRequest, err.Error())
-		return
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	product, err := tr.admin.GetProductByID(id)
+
 	if err != nil {
-		_ = WriteError(w, http.StatusInternalServerError, err.Error())
-		return
+		return err
 	}
 
-	_ = WriteJSON(w, http.StatusOK, product)
+	return c.JSON(http.StatusOK, product)
+}
+
+func (tr *transport) CreateProductHandler(c echo.Context) error {
+	var product db.Product
+	if err := c.Bind(&product); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	res, err := tr.admin.CreateProduct(product)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusCreated, res)
+}
+
+func (tr *transport) UpdateProductHandler(c echo.Context) error {
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+
+	var upd admSvc.UpdateProductRequest
+
+	if err := c.Bind(&upd); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	res, err := tr.admin.UpdateProduct(id, upd)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, res)
 }

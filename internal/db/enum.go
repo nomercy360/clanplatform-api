@@ -1,12 +1,5 @@
 package db
 
-type UserRoleEnum string
-
-const (
-	Admin    UserRoleEnum = "admin"
-	Merchant UserRoleEnum = "merchant"
-)
-
 type DiscountTypeEnum string
 
 const (

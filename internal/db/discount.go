@@ -17,7 +17,7 @@ type Discount struct {
 	Value      int              `db:"value" json:"value"`
 }
 
-func (s *storage) CreateDiscount(discount Discount) (*Discount, error) {
+func (s *Storage) CreateDiscount(discount Discount) (*Discount, error) {
 	var res Discount
 
 	query := `
@@ -44,7 +44,7 @@ func (s *storage) CreateDiscount(discount Discount) (*Discount, error) {
 	return &res, nil
 }
 
-func (s *storage) ListDiscounts() ([]Discount, error) {
+func (s *Storage) ListDiscounts() ([]Discount, error) {
 	discounts := make([]Discount, 0)
 	err := s.pg.Select(&discounts, "SELECT * FROM discounts")
 	if err != nil {
@@ -53,7 +53,7 @@ func (s *storage) ListDiscounts() ([]Discount, error) {
 	return discounts, nil
 }
 
-func (s *storage) UpdateDiscount(discount Discount) (*Discount, error) {
+func (s *Storage) UpdateDiscount(discount Discount) (*Discount, error) {
 	var res Discount
 
 	query := `
@@ -81,7 +81,7 @@ func (s *storage) UpdateDiscount(discount Discount) (*Discount, error) {
 	return &res, nil
 }
 
-func (s *storage) DeleteDiscount(id string) error {
+func (s *Storage) DeleteDiscount(id string) error {
 	query := `
 		DELETE FROM discounts
 		WHERE id = $1;

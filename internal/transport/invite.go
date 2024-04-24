@@ -1,56 +1,57 @@
 package transport
 
 import (
-	"encoding/json"
+	"github.com/labstack/echo/v4"
 	"net/http"
 )
 
-func (tr *transport) InviteUserHandler(w http.ResponseWriter, r *http.Request) {
+func (tr *transport) InviteUserHandler(c echo.Context) error {
 	var data struct {
 		Email string `json:"email"`
 		Role  string `json:"role"`
 	}
 
-	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
-		_ = WriteError(w, http.StatusBadRequest, err.Error())
-		return
+	if err := c.Bind(&data); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	w.WriteHeader(http.StatusCreated)
+	err := tr.admin.InviteUser(data.Role, data.Email)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{"message": "invite sent"})
 }
 
-func (tr *transport) ListInvitesHandler(w http.ResponseWriter, r *http.Request) {
+func (tr *transport) ListInvitesHandler(c echo.Context) error {
 	invites, err := tr.admin.ListInvites()
 
 	if err != nil {
-		_ = WriteError(w, http.StatusInternalServerError, err.Error())
-		return
+		return WriteError(c.Response(), http.StatusInternalServerError, err.Error())
 	}
 
-	_ = WriteJSON(w, http.StatusOK, invites)
+	return c.JSON(http.StatusOK, invites)
 }
 
-func (tr *transport) AcceptInviteHandler(w http.ResponseWriter, r *http.Request) {
+func (tr *transport) AcceptInviteHandler(c echo.Context) error {
 	var data struct {
 		Token string `json:"token"`
 		User  struct {
-			Password  string `json:"password"`
-			FirstName string `json:"first_name"`
-			LastName  string `json:"last_name"`
+			Password string `json:"password"`
+			FullName string
 		}
 	}
 
-	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
-		_ = WriteError(w, http.StatusBadRequest, err.Error())
-		return
+	if err := c.Bind(&data); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	err := tr.admin.AcceptInvite(data.Token, data.User.Password, data.User.FirstName, data.User.LastName)
+	err := tr.admin.AcceptInvite(data.Token, data.User.Password, data.User.FullName)
 
 	if err != nil {
-		_ = WriteError(w, http.StatusInternalServerError, err.Error())
-		return
+		return WriteError(c.Response(), http.StatusInternalServerError, err.Error())
 	}
 
-	_ = WriteJSON(w, http.StatusOK, map[string]string{"message": "invite accepted"})
+	return c.JSON(http.StatusOK, map[string]string{"message": "invite accepted"})
 }

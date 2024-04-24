@@ -3,6 +3,8 @@ package db
 import (
 	"encoding/json"
 	"fmt"
+	"sort"
+	"strings"
 	"time"
 )
 
@@ -37,6 +39,14 @@ type Product struct {
 	UpdatedAt    time.Time        `db:"updated_at" json:"updated_at"`
 	DeletedAt    *time.Time       `db:"deleted_at" json:"deleted_at"`
 	Metadata     *json.RawMessage `db:"metadata" json:"metadata"`
+}
+
+func (p Product) Validate() error {
+	if p.Title == "" {
+		return fmt.Errorf("title is required")
+	}
+
+	return nil
 }
 
 type ProductWithDetails struct {
@@ -81,12 +91,12 @@ type Image struct {
 }
 
 type ProductVariant struct {
-	ID        int64     `db:"id"`
-	ProductID int64     `db:"product_id"`
-	Title     string    `db:"title"`
-	Inventory int       `db:"inventory"`
-	CreatedAt time.Time `db:"created_at"`
-	UpdatedAt time.Time `db:"updated_at"`
+	ID        int64     `db:"id" json:"id"`
+	ProductID int64     `db:"product_id" json:"product_id" validate:"required"`
+	Title     string    `db:"title" json:"title" validate:"required"`
+	Inventory int       `db:"inventory" json:"inventory"`
+	CreatedAt time.Time `db:"created_at" json:"created_at"`
+	UpdatedAt time.Time `db:"updated_at" json:"updated_at"`
 }
 
 // Helper function to check and add unique images
@@ -133,7 +143,7 @@ type Price struct {
 	CurrencyCode string `json:"currency_code"`
 }
 
-func (s *storage) ListProducts() ([]ProductWithDetails, error) {
+func (s *Storage) ListProducts() ([]ProductWithDetails, error) {
 	query := `
 		SELECT p.id, p.title, p.subtitle, p.description, p.handle, p.is_published,
 		       p.collection_id, p.metadata, p.created_at, p.updated_at, p.deleted_at,
@@ -253,28 +263,28 @@ func (s *storage) ListProducts() ([]ProductWithDetails, error) {
 		return nil, fmt.Errorf("iterating product rows: %w", err)
 	}
 
+	byID := func(i, j int) bool {
+		return products[i].ID < products[j].ID
+	}
+
+	sort.Slice(products, byID)
+
 	return products, nil
 }
 
-func (s *storage) CreateProduct(title string, subtitle string, description string, handle string) (Product, error) {
+func (s *Storage) CreateProduct(p Product) (*Product, error) {
 	query := `
 		INSERT INTO products (title, subtitle, description, handle, is_published) 
 		VALUES (:title, :subtitle, :description, :handle, :is_published)
-		RETURNING *;
+		RETURNING id, title, subtitle, description, handle, is_published, collection_id, metadata, created_at, updated_at, deleted_at;
 	`
 
 	var result Product
 
-	rows, err := s.pg.NamedQuery(query, Product{
-		Title:       title,
-		Subtitle:    subtitle,
-		Description: description,
-		Handle:      handle,
-		IsPublished: false,
-	})
+	rows, err := s.pg.NamedQuery(query, p)
 
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 
 	defer rows.Close()
@@ -282,14 +292,14 @@ func (s *storage) CreateProduct(title string, subtitle string, description strin
 	if rows.Next() {
 		err = rows.StructScan(&result)
 		if err != nil {
-			return result, err
+			return nil, err
 		}
 	}
 
-	return result, nil
+	return &result, nil
 }
 
-func (s *storage) CreateProductVariant(
+func (s *Storage) CreateProductVariant(
 	productID int64,
 	title string,
 	inventory int,
@@ -324,7 +334,13 @@ func (s *storage) CreateProductVariant(
 	return &result, nil
 }
 
-func (s *storage) GetProductByID(id int64) (*ProductWithDetails, error) {
+func (s *Storage) GetProductByID(id int64) (*ProductWithDetails, error) {
+	err := s.pg.Get(&Product{}, "SELECT * FROM products WHERE id = $1", id)
+
+	if err != nil {
+		return nil, err
+	}
+
 	query := `
 		SELECT p.id, p.title, p.subtitle, p.description, p.handle, p.is_published,
 		       p.collection_id, p.metadata, p.created_at, p.updated_at, p.deleted_at,
@@ -426,11 +442,48 @@ func (s *storage) GetProductByID(id int64) (*ProductWithDetails, error) {
 
 			product.Categories = addUniqueCategory(product.Categories, category)
 		}
-
 	}
 
 	if err = rows.Err(); err != nil {
 		return nil, fmt.Errorf("iterating product rows: %w", err)
+	}
+
+	return &product, nil
+}
+
+func (s *Storage) UpdateProduct(id int64, update map[string]any) (*Product, error) {
+	// Start building the SQL query dynamically
+	baseQuery := "UPDATE products SET "
+	var setClauses = []string{"updated_at = now()"}
+	var queryParams = map[string]any{
+		"id": id,
+	}
+
+	// Loop through the update map to build the SET clause
+	for key, value := range update {
+		paramName := fmt.Sprintf("%s", key)
+		setClauses = append(setClauses, fmt.Sprintf("%s = :%s", key, paramName))
+		queryParams[paramName] = value
+	}
+
+	// Join the set clauses with commas and append the WHERE and RETURNING clauses
+	query := baseQuery + strings.Join(setClauses, ", ") + " WHERE id = :id RETURNING *;"
+
+	var product Product
+
+	// Execute the query
+	rows, err := s.pg.NamedQuery(query, queryParams)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	// Fetch the updated product
+	if rows.Next() {
+		err = rows.StructScan(&product)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return &product, nil

@@ -11,7 +11,7 @@ type storage interface {
 
 	ListInvites() ([]db.Invite, error)
 	GetInviteByEmail(email string) (*db.Invite, error)
-	InviteUser(token string, email string, enum db.UserRoleEnum) error
+	InviteUser(token string, email string) error
 	GetUserByEmail(email string) (*db.User, error)
 
 	CreateDiscount(discount db.Discount) (*db.Discount, error)
@@ -30,6 +30,8 @@ type storage interface {
 	ListProducts() ([]db.ProductWithDetails, error)
 	CreateProductVariant(productID int64, title string, inventory int) (*db.ProductVariant, error)
 	GetProductByID(id int64) (*db.ProductWithDetails, error)
+	CreateProduct(product db.Product) (*db.Product, error)
+	UpdateProduct(id int64, update map[string]any) (*db.Product, error)
 }
 
 type emailClient interface {
