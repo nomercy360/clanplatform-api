@@ -3,6 +3,7 @@ package admin
 import (
 	"clanplatform/internal/db"
 	"clanplatform/internal/terrors"
+	"errors"
 	"time"
 )
 
@@ -17,12 +18,13 @@ func (adm *admin) ListDiscounts() ([]db.Discount, error) {
 }
 
 type CreateDiscount struct {
-	Code       string    `json:"code" validate:"required"`
-	Type       string    `json:"type" validate:"required,oneof=percentage fixed free_shipping"`
-	Value      int       `json:"value" validate:"required,min=1"`
-	StartsAt   time.Time `json:"starts_at"`
-	UsageLimit int       `json:"usage_limit" validate:"omitempty,min=1"`
-}
+	Code       string     `json:"code" validate:"required"`
+	Type       string     `json:"type" validate:"required,oneof=percentage fixed free_shipping"`
+	Value      int        `json:"value" validate:"required,min=1"`
+	UsageLimit int        `json:"usage_limit" validate:"omitempty,min=1"`
+	StartsAt   time.Time  `json:"starts_at"`
+	EndsAt     *time.Time `json:"ends_at"`
+} // @Name CreateDiscount
 
 func (cd CreateDiscount) toDiscount() db.Discount {
 	return db.Discount{
@@ -31,12 +33,18 @@ func (cd CreateDiscount) toDiscount() db.Discount {
 		Value:      cd.Value,
 		StartsAt:   cd.StartsAt,
 		UsageLimit: cd.UsageLimit,
+		EndsAt:     cd.EndsAt,
+		IsActive:   true,
 	}
 }
 
 func (adm *admin) CreateDiscount(cd CreateDiscount) (*db.Discount, error) {
 	if cd.StartsAt.IsZero() {
 		cd.StartsAt = time.Now()
+	}
+
+	if cd.Type == "percentage" && (cd.Value < 1 || cd.Value > 100) {
+		return nil, terrors.BadRequest(errors.New("percentage value must be between 1 and 100"))
 	}
 
 	res, err := adm.storage.CreateDiscount(cd.toDiscount())

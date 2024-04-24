@@ -4,7 +4,6 @@ import (
 	adm "clanplatform/internal/admin"
 	"github.com/labstack/echo/v4"
 	"net/http"
-	"time"
 )
 
 // ListUsersHandler godoc
@@ -19,7 +18,7 @@ func (tr *transport) ListUsersHandler(c echo.Context) error {
 	users, err := tr.admin.ListUsers()
 
 	if err != nil {
-		return WriteError(c.Response(), http.StatusInternalServerError, err.Error())
+		return err
 	}
 
 	return c.JSON(http.StatusOK, users)
@@ -48,24 +47,33 @@ func (tr *transport) CreateUserHandler(c echo.Context) error {
 	res, err := tr.admin.CreateUser(data)
 
 	if err != nil {
-		return WriteError(c.Response(), http.StatusInternalServerError, err.Error())
+		return err
 	}
 
 	return c.JSON(http.StatusCreated, res)
 }
 
-// AuthCookieHandler set cookie and returns user
+// AuthCookieHandler godoc
+// @Summary Authenticate user
+// @Description authenticate user
+// @Tags users
+// @Accept  json
+// @Produce  json
+// @Param user body AuthUser true "User data"
+// @Success 200 {object} UserWithToken
+// @Router /admin/auth [post]
 func (tr *transport) AuthCookieHandler(c echo.Context) error {
-	var data struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
-	}
+	var data adm.AuthUser
 
 	if err := c.Bind(&data); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	user, err := tr.admin.AuthUser(data.Email, data.Password)
+	if err := c.Validate(data); err != nil {
+		return err
+	}
+
+	user, err := tr.admin.AuthUser(data)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -75,29 +83,39 @@ func (tr *transport) AuthCookieHandler(c echo.Context) error {
 
 	cookie.Name = "token"
 	cookie.Value = user.Token
-	cookie.Expires = time.Now().Add(24 * time.Hour)
+	cookie.HttpOnly = true
+	cookie.Path = "/"
 
 	c.SetCookie(cookie)
 
 	return c.JSON(http.StatusOK, user)
 }
 
-// AuthTokenHandler returns jwt token
+// AuthTokenHandler godoc
+// @Summary Authenticate user
+// @Description authenticate user
+// @Tags users
+// @Accept  json
+// @Produce  json
+// @Param user body AuthUser true "User data"
+// @Success 200 {object} UserWithToken
+// @Router /admin/auth/token [post]
 func (tr *transport) AuthTokenHandler(c echo.Context) error {
-	var data struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
-	}
+	var data adm.AuthUser
 
 	if err := c.Bind(&data); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	user, err := tr.admin.AuthUser(data.Email, data.Password)
+	if err := c.Validate(data); err != nil {
+		return err
+	}
+
+	user, err := tr.admin.AuthUser(data)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, map[string]string{"token": user.Token})
+	return c.JSON(http.StatusOK, user)
 }

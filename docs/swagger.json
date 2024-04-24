@@ -1,112 +1,339 @@
 {
-  "swagger": "2.0",
-  "info": {
-    "description": "This is a sample server ClanPlatform server.",
-    "title": "ClanPlatform API",
-    "contact": {},
-    "version": "1.0"
-  },
-  "host": "localhost:8080",
-  "basePath": "/",
-  "paths": {
-    "/admin/users": {
-      "get": {
-        "description": "get users",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "tags": [
-          "users"
-        ],
-        "summary": "List users",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/User"
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "description": "create user",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "tags": [
-          "users"
-        ],
-        "summary": "Create user",
-        "parameters": [
-          {
-            "description": "User data",
-            "name": "user",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/CreateUser"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "Created",
-            "schema": {
-              "$ref": "#/definitions/User"
-            }
-          }
-        }
-      }
-    }
-  },
-  "definitions": {
-    "CreateUser": {
-      "type": "object",
-      "required": [
-        "email",
-        "full_name",
-        "password"
-      ],
-      "properties": {
-        "email": {
-          "type": "string"
-        },
-        "full_name": {
-          "type": "string"
-        },
-        "password": {
-          "type": "string"
-        }
-      }
+    "swagger": "2.0",
+    "info": {
+        "description": "This is a sample server ClanPlatform server.",
+        "title": "ClanPlatform API",
+        "contact": {},
+        "version": "1.0"
     },
-    "User": {
-      "type": "object",
-      "properties": {
-        "created_at": {
-          "type": "string"
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {
+        "/admin/auth": {
+            "post": {
+                "description": "authenticate user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Authenticate user",
+                "parameters": [
+                    {
+                        "description": "User data",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/AuthUser"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/UserWithToken"
+                        }
+                    }
+                }
+            }
         },
-        "email": {
-          "type": "string"
+        "/admin/auth/token": {
+            "post": {
+                "description": "authenticate user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Authenticate user",
+                "parameters": [
+                    {
+                        "description": "User data",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/AuthUser"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/UserWithToken"
+                        }
+                    }
+                }
+            }
         },
-        "full_name": {
-          "type": "string"
+        "/admin/discounts": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "discounts"
+                ],
+                "summary": "List discounts",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Discount"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "discounts"
+                ],
+                "summary": "Create discount",
+                "parameters": [
+                    {
+                        "description": "Discount data",
+                        "name": "discount",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CreateDiscount"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Discount"
+                        }
+                    }
+                }
+            }
         },
-        "id": {
-          "type": "integer"
-        },
-        "updated_at": {
-          "type": "string"
+        "/admin/users": {
+            "get": {
+                "description": "get users",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "List users",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/User"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "create user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Create user",
+                "parameters": [
+                    {
+                        "description": "User data",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CreateUser"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    }
+                }
+            }
         }
-      }
+    },
+    "definitions": {
+        "AuthUser": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "CreateDiscount": {
+            "type": "object",
+            "required": [
+                "code",
+                "type",
+                "value"
+            ],
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "ends_at": {
+                    "type": "string"
+                },
+                "starts_at": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "percentage",
+                        "fixed",
+                        "free_shipping"
+                    ]
+                },
+                "usage_limit": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "value": {
+                    "type": "integer",
+                    "minimum": 1
+                }
+            }
+        },
+        "CreateUser": {
+            "type": "object",
+            "required": [
+                "email",
+                "full_name",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "full_name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "Discount": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "deleted_at": {
+                    "type": "string"
+                },
+                "ends_at": {
+                    "type": "string",
+                    "x-nullable": true
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "starts_at": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "usage_count": {
+                    "type": "integer"
+                },
+                "usage_limit": {
+                    "type": "integer"
+                },
+                "value": {
+                    "type": "integer"
+                }
+            }
+        },
+        "User": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "full_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "UserWithToken": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/User"
+                }
+            }
+        }
     }
-  }
 }

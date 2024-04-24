@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "drop": "docker exec -it postgres psql -U postgres -d postgres -c 'DROP DATABASE IF EXISTS clanplatform WITH (FORCE);'",
-    "create": "docker exec -it postgres psql -U postgres -d postgres -c 'CREATE DATABASE clanplatform;'",
+    "drop": "docker exec -it postgres psql -U postgres -d postgres -c \"DROP DATABASE IF EXISTS clanplatform WITH (FORCE);\"",
+    "create": "docker exec -it postgres psql -U postgres -d postgres -c \"CREATE DATABASE clanplatform;\"",
     "migrate": "migrate -source file://../scripts/migrations -database postgres://postgres:mysecretpassword@localhost:5432/clanplatform?sslmode=disable up",
     "test": "npm run drop && npm run create && npm run migrate && npx ts-mocha test.ts --timeout=10000"
   },

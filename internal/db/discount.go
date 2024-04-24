@@ -10,12 +10,12 @@ type Discount struct {
 	UsageLimit int        `db:"usage_limit" json:"usage_limit"`
 	UsageCount int        `db:"usage_count" json:"usage_count"`
 	StartsAt   time.Time  `db:"starts_at" json:"starts_at"`
-	EndsAt     *time.Time `db:"ends_at" json:"ends_at"`
+	EndsAt     *time.Time `db:"ends_at" json:"ends_at" extensions:"x-nullable"`
 	CreatedAt  time.Time  `db:"created_at" json:"created_at"`
 	UpdatedAt  time.Time  `db:"updated_at" json:"updated_at"`
 	DeletedAt  *time.Time `db:"deleted_at" json:"deleted_at"`
 	Value      int        `db:"value" json:"value"`
-}
+} // @Name Discount
 
 func (s *Storage) CreateDiscount(discount Discount) (*Discount, error) {
 	var res Discount

@@ -6,16 +6,31 @@ import (
 	"net/http"
 )
 
+// ListDiscountsHandler godoc
+// @Summary List discounts
+// @Tags discounts
+// @Accept  json
+// @Produce  json
+// @Success 200 {array} Discount
+// @Router /admin/discounts [get]
 func (tr *transport) ListDiscountsHandler(c echo.Context) error {
 	discounts, err := tr.admin.ListDiscounts()
 
 	if err != nil {
-		return WriteError(c.Response(), http.StatusInternalServerError, err.Error())
+		return err
 	}
 
 	return c.JSON(http.StatusOK, discounts)
 }
 
+// CreateDiscountHandler godoc
+// @Summary Create discount
+// @Tags discounts
+// @Accept  json
+// @Produce  json
+// @Param discount body CreateDiscount true "Discount data"
+// @Success 200 {object} Discount
+// @Router /admin/discounts [post]
 func (tr *transport) CreateDiscountHandler(c echo.Context) error {
 	var discount adm.CreateDiscount
 
@@ -33,5 +48,5 @@ func (tr *transport) CreateDiscountHandler(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, res)
+	return c.JSON(http.StatusCreated, res)
 }

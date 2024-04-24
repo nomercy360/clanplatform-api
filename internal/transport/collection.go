@@ -73,7 +73,7 @@ func (tr *transport) UpdateCollectionHandler(c echo.Context) error {
 	res, err := tr.admin.UpdateCollection(data.Title, data.Handle, id)
 
 	if err != nil {
-		return WriteError(c.Response(), http.StatusInternalServerError, err.Error())
+		return err
 	}
 
 	return c.JSON(http.StatusOK, res)
@@ -112,10 +112,8 @@ func (tr *transport) AddProductsToCollectionHandler(c echo.Context) error {
 		return err
 	}
 
-	err = tr.admin.AddProductsToCollection(collectionID, data.ProductIDs)
-
-	if err != nil {
-		return WriteError(c.Response(), http.StatusInternalServerError, err.Error())
+	if err := tr.admin.AddProductsToCollection(collectionID, data.ProductIDs); err != nil {
+		return err
 	}
 
 	return c.NoContent(http.StatusOK)
@@ -124,7 +122,7 @@ func (tr *transport) AddProductsToCollectionHandler(c echo.Context) error {
 func (tr *transport) RemoveProductsFromCollectionHandler(c echo.Context) error {
 	collectionID, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
-		return WriteError(c.Response(), http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	var data struct {
@@ -135,10 +133,8 @@ func (tr *transport) RemoveProductsFromCollectionHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	err = tr.admin.RemoveProductsFromCollection(collectionID, data.ProductIDs)
-
-	if err != nil {
-		return WriteError(c.Response(), http.StatusInternalServerError, err.Error())
+	if err := tr.admin.RemoveProductsFromCollection(collectionID, data.ProductIDs); err != nil {
+		return err
 	}
 
 	return c.NoContent(http.StatusOK)

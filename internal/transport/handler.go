@@ -3,7 +3,6 @@ package transport
 import (
 	adm "clanplatform/internal/admin"
 	"clanplatform/internal/db"
-	"encoding/json"
 	"github.com/go-playground/validator"
 	"github.com/labstack/echo/v4"
 	"net/http"
@@ -25,7 +24,7 @@ type transport struct {
 type admin interface {
 	ListUsers() ([]db.User, error)
 	CreateUser(user adm.CreateUser) (*db.User, error)
-	AuthUser(email, password string) (*adm.UserWithToken, error)
+	AuthUser(auth adm.AuthUser) (*adm.UserWithToken, error)
 	GetUserByEmail(email string) (*db.User, error)
 
 	CreateDiscount(cd adm.CreateDiscount) (*db.Discount, error)
@@ -55,30 +54,6 @@ type store interface {
 
 func NewTransport(admin admin, store store, jwtSecret string) *transport {
 	return &transport{admin: admin, store: store, jwtSecret: jwtSecret}
-}
-
-// WriteError responds to a HTTP request with an error.
-func WriteError(w http.ResponseWriter, code int, message string) error {
-	err := WriteJSON(w, code, map[string]string{"error": message})
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// WriteJSON writes a JSON response to a HTTP request.
-func WriteJSON(w http.ResponseWriter, code int, payload interface{}) error {
-	response, _ := json.Marshal(payload)
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
-	_, err := w.Write(response)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 type HealthStatus struct {

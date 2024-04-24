@@ -39,20 +39,25 @@ func (adm *admin) GetUserByEmail(email string) (*db.User, error) {
 type UserWithToken struct {
 	User  *db.User `json:"user"`
 	Token string   `json:"token"`
-}
+} // @Name UserWithToken
 
-func (adm *admin) AuthUser(email, password string) (*UserWithToken, error) {
-	user, err := adm.storage.GetUserByEmail(email)
+type AuthUser struct {
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required"`
+} // @Name AuthUser
+
+func (adm *admin) AuthUser(authUser AuthUser) (*UserWithToken, error) {
+	user, err := adm.storage.GetUserByEmail(authUser.Email)
 	if err != nil {
 		return nil, err
 	}
 
-	if err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password)); err != nil {
+	if err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(authUser.Password)); err != nil {
 		return nil, terrors.BadRequest(err)
 	}
 
 	claims := jwt.MapClaims{
-		"email": email,
+		"email": user.Email,
 		"exp":   time.Now().Add(time.Hour * 24).Unix(),
 	}
 
@@ -85,7 +90,9 @@ func (adm *admin) CreateUser(cr CreateUser) (*db.User, error) {
 
 	createdUser, err := adm.storage.CreateUser(user)
 
-	if err != nil {
+	if err != nil && db.IsDuplicationError(err) {
+		return nil, terrors.BadRequest(err)
+	} else if err != nil {
 		return nil, err
 	}
 

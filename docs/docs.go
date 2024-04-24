@@ -15,6 +15,130 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/admin/auth": {
+            "post": {
+                "description": "authenticate user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Authenticate user",
+                "parameters": [
+                    {
+                        "description": "User data",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/AuthUser"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/UserWithToken"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/auth/token": {
+            "post": {
+                "description": "authenticate user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Authenticate user",
+                "parameters": [
+                    {
+                        "description": "User data",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/AuthUser"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/UserWithToken"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/discounts": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "discounts"
+                ],
+                "summary": "List discounts",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Discount"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "discounts"
+                ],
+                "summary": "Create discount",
+                "parameters": [
+                    {
+                        "description": "Discount data",
+                        "name": "discount",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CreateDiscount"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Discount"
+                        }
+                    }
+                }
+            }
+        },
         "/admin/users": {
             "get": {
                 "description": "get users",
@@ -75,6 +199,56 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "AuthUser": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "CreateDiscount": {
+            "type": "object",
+            "required": [
+                "code",
+                "type",
+                "value"
+            ],
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "ends_at": {
+                    "type": "string"
+                },
+                "starts_at": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "percentage",
+                        "fixed",
+                        "free_shipping"
+                    ]
+                },
+                "usage_limit": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "value": {
+                    "type": "integer",
+                    "minimum": 1
+                }
+            }
+        },
         "CreateUser": {
             "type": "object",
             "required": [
@@ -91,6 +265,48 @@ const docTemplate = `{
                 },
                 "password": {
                     "type": "string"
+                }
+            }
+        },
+        "Discount": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "deleted_at": {
+                    "type": "string"
+                },
+                "ends_at": {
+                    "type": "string",
+                    "x-nullable": true
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "starts_at": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "usage_count": {
+                    "type": "integer"
+                },
+                "usage_limit": {
+                    "type": "integer"
+                },
+                "value": {
+                    "type": "integer"
                 }
             }
         },
@@ -111,6 +327,17 @@ const docTemplate = `{
                 },
                 "updated_at": {
                     "type": "string"
+                }
+            }
+        },
+        "UserWithToken": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/User"
                 }
             }
         }

@@ -25,7 +25,7 @@ import (
 )
 
 type Config struct {
-	DbConnString string       `yaml:"db_conn_string" validate:"required"`
+	DBConnString string       `yaml:"db_conn_string" validate:"required"`
 	Server       ServerConfig `yaml:"server" validate:"required"`
 	JWTSecret    string       `yaml:"jwt_secret" validate:"required"`
 	ResendApiKey string       `yaml:"resend_api_key" validate:"required"`
@@ -70,7 +70,7 @@ func main() {
 		log.Fatalf("Error reading config: %v", err)
 	}
 
-	pg, err := db.NewDB(config.DbConnString)
+	pg, err := db.NewDB(config.DBConnString)
 
 	if err != nil {
 		log.Fatalf("Failed to initialize database: %v\n", err)

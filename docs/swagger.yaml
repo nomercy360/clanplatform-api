@@ -1,5 +1,40 @@
 basePath: /
 definitions:
+  AuthUser:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  CreateDiscount:
+    properties:
+      code:
+        type: string
+      ends_at:
+        type: string
+      starts_at:
+        type: string
+      type:
+        enum:
+        - percentage
+        - fixed
+        - free_shipping
+        type: string
+      usage_limit:
+        minimum: 1
+        type: integer
+      value:
+        minimum: 1
+        type: integer
+    required:
+    - code
+    - type
+    - value
+    type: object
   CreateUser:
     properties:
       email:
@@ -9,9 +44,37 @@ definitions:
       password:
         type: string
     required:
-      - email
-      - full_name
-      - password
+    - email
+    - full_name
+    - password
+    type: object
+  Discount:
+    properties:
+      code:
+        type: string
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      ends_at:
+        type: string
+        x-nullable: true
+      id:
+        type: integer
+      is_active:
+        type: boolean
+      starts_at:
+        type: string
+      type:
+        type: string
+      updated_at:
+        type: string
+      usage_count:
+        type: integer
+      usage_limit:
+        type: integer
+      value:
+        type: integer
     type: object
   User:
     properties:
@@ -26,20 +89,107 @@ definitions:
       updated_at:
         type: string
     type: object
+  UserWithToken:
+    properties:
+      token:
+        type: string
+      user:
+        $ref: '#/definitions/User'
+    type: object
 host: localhost:8080
 info:
-  contact: { }
+  contact: {}
   description: This is a sample server ClanPlatform server.
   title: ClanPlatform API
   version: "1.0"
 paths:
+  /admin/auth:
+    post:
+      consumes:
+      - application/json
+      description: authenticate user
+      parameters:
+      - description: User data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/AuthUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/UserWithToken'
+      summary: Authenticate user
+      tags:
+      - users
+  /admin/auth/token:
+    post:
+      consumes:
+      - application/json
+      description: authenticate user
+      parameters:
+      - description: User data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/AuthUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/UserWithToken'
+      summary: Authenticate user
+      tags:
+      - users
+  /admin/discounts:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/Discount'
+            type: array
+      summary: List discounts
+      tags:
+      - discounts
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Discount data
+        in: body
+        name: discount
+        required: true
+        schema:
+          $ref: '#/definitions/CreateDiscount'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/Discount'
+      summary: Create discount
+      tags:
+      - discounts
   /admin/users:
     get:
       consumes:
-        - application/json
+      - application/json
       description: get users
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: OK
@@ -49,20 +199,20 @@ paths:
             type: array
       summary: List users
       tags:
-        - users
+      - users
     post:
       consumes:
-        - application/json
+      - application/json
       description: create user
       parameters:
-        - description: User data
-          in: body
-          name: user
-          required: true
-          schema:
-            $ref: '#/definitions/CreateUser'
+      - description: User data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/CreateUser'
       produces:
-        - application/json
+      - application/json
       responses:
         "201":
           description: Created
@@ -70,5 +220,5 @@ paths:
             $ref: '#/definitions/User'
       summary: Create user
       tags:
-        - users
+      - users
 swagger: "2.0"
