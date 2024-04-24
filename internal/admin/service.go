@@ -9,9 +9,6 @@ type storage interface {
 	ListUsers() ([]db.User, error)
 	CreateUser(user db.User) (*db.User, error)
 
-	ListInvites() ([]db.Invite, error)
-	GetInviteByEmail(email string) (*db.Invite, error)
-	InviteUser(token string, email string) error
 	GetUserByEmail(email string) (*db.User, error)
 
 	CreateDiscount(discount db.Discount) (*db.Discount, error)

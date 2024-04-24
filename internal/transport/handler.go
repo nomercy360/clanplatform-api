@@ -26,11 +26,6 @@ type admin interface {
 	ListUsers() ([]db.User, error)
 	CreateUser(user adm.CreateUser) (*db.User, error)
 	AuthUser(email, password string) (*adm.UserWithToken, error)
-
-	ListInvites() ([]db.Invite, error)
-	GetInviteByEmail(email string) (*db.Invite, error)
-	AcceptInvite(token, password, fullName string) error
-	InviteUser(role, email string) error
 	GetUserByEmail(email string) (*db.User, error)
 
 	CreateDiscount(cd adm.CreateDiscount) (*db.Discount, error)
@@ -119,10 +114,6 @@ func (tr *transport) RegisterRoutes(e *echo.Echo) {
 
 	a.GET("/discounts", tr.ListDiscountsHandler)
 	a.POST("/discounts", tr.CreateDiscountHandler)
-
-	a.POST("/invites", tr.InviteUserHandler)
-	a.POST("/invites/accept", tr.AcceptInviteHandler)
-	a.POST("/invites", tr.ListInvitesHandler)
 
 	a.GET("/collections", tr.ListCollectionsHandler)
 	a.POST("/collections", tr.CreateCollectionHandler)

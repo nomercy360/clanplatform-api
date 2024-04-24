@@ -1,0 +1,22 @@
+{
+  "root": ".",
+  "input": {
+    "path": "./docs/swagger.yaml"
+  },
+  "output": {
+    "path": "./gen"
+  },
+  "logLevel": "info",
+  "plugins": [
+    [
+      "@kubb/swagger",
+      {
+        "output": false,
+        "validate": true
+      }
+    ],
+    [
+      "@kubb/swagger-ts"
+    ]
+  ]
+}

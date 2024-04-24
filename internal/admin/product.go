@@ -6,18 +6,6 @@ import (
 )
 
 func (adm *admin) CreateProductVariant(variant db.ProductVariant) (*db.ProductVariant, error) {
-	if variant.ProductID == 0 {
-		return nil, invalidReqErr
-	}
-
-	if variant.Title == "" {
-		return nil, invalidReqErr
-	}
-
-	if variant.Inventory == 0 {
-		return nil, invalidReqErr
-	}
-
 	res, err := adm.storage.CreateProductVariant(variant.ProductID, variant.Title, variant.Inventory)
 
 	if err != nil {

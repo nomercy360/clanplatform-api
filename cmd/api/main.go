@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "clanplatform/docs"
 	adm "clanplatform/internal/admin"
 	"clanplatform/internal/db"
 	"clanplatform/internal/services"
@@ -13,6 +14,7 @@ import (
 	"github.com/go-playground/validator"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	echoSwagger "github.com/swaggo/echo-swagger"
 	"gopkg.in/yaml.v3"
 	"log"
 	"log/slog"
@@ -53,6 +55,12 @@ func ReadConfig(filename string) (*Config, error) {
 	return &config, nil
 }
 
+// @title ClanPlatform API
+// @version 1.0
+// @description This is a sample server ClanPlatform server.
+
+// @host localhost:8080
+// @BasePath /
 func main() {
 	configPath := flag.String("config", "config.yaml", "Path to the config file")
 	flag.Parse()
@@ -139,6 +147,8 @@ func main() {
 	app := transport.NewTransport(admin, store, config.JWTSecret)
 
 	app.RegisterRoutes(e)
+
+	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()

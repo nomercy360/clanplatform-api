@@ -10,7 +10,7 @@ func (tr *transport) ListCollectionsHandler(c echo.Context) error {
 	collections, err := tr.admin.ListCollections()
 
 	if err != nil {
-		return WriteError(c.Response(), http.StatusInternalServerError, err.Error())
+		return err
 	}
 
 	return c.JSON(http.StatusOK, collections)
@@ -29,7 +29,7 @@ func (tr *transport) CreateCollectionHandler(c echo.Context) error {
 	collection, err := tr.admin.CreateCollection(data.Title, data.Handle)
 
 	if err != nil {
-		return WriteError(c.Response(), http.StatusInternalServerError, err.Error())
+		return err
 	}
 
 	return c.JSON(http.StatusOK, collection)
@@ -39,13 +39,13 @@ func (tr *transport) GetCollectionByIDHandler(c echo.Context) error {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 
 	if err != nil {
-		return WriteError(c.Response(), http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	collection, err := tr.admin.GetCollectionByID(id)
 
 	if err != nil {
-		return WriteError(c.Response(), http.StatusInternalServerError, err.Error())
+		return err
 	}
 
 	return c.JSON(http.StatusOK, collection)
@@ -54,7 +54,7 @@ func (tr *transport) GetCollectionByIDHandler(c echo.Context) error {
 func (tr *transport) UpdateCollectionHandler(c echo.Context) error {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
-		return WriteError(c.Response(), http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	var data struct {
@@ -64,6 +64,10 @@ func (tr *transport) UpdateCollectionHandler(c echo.Context) error {
 
 	if err := c.Bind(&data); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	if err := c.Validate(data); err != nil {
+		return err
 	}
 
 	res, err := tr.admin.UpdateCollection(data.Title, data.Handle, id)
@@ -78,13 +82,13 @@ func (tr *transport) UpdateCollectionHandler(c echo.Context) error {
 func (tr *transport) DeleteCollectionHandler(c echo.Context) error {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
-		return WriteError(c.Response(), http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	err = tr.admin.DeleteCollection(id)
 
 	if err != nil {
-		return WriteError(c.Response(), http.StatusInternalServerError, err.Error())
+		return err
 	}
 
 	return c.JSON(http.StatusOK, map[string]string{"message": "collection deleted"})
@@ -93,7 +97,7 @@ func (tr *transport) DeleteCollectionHandler(c echo.Context) error {
 func (tr *transport) AddProductsToCollectionHandler(c echo.Context) error {
 	collectionID, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
-		return WriteError(c.Response(), http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	var data struct {
@@ -102,6 +106,10 @@ func (tr *transport) AddProductsToCollectionHandler(c echo.Context) error {
 
 	if err := c.Bind(&data); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	if err := c.Validate(data); err != nil {
+		return err
 	}
 
 	err = tr.admin.AddProductsToCollection(collectionID, data.ProductIDs)

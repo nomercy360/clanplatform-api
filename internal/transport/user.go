@@ -7,6 +7,14 @@ import (
 	"time"
 )
 
+// ListUsersHandler godoc
+// @Summary List users
+// @Description get users
+// @Tags users
+// @Accept  json
+// @Produce  json
+// @Success 200 {array} User
+// @Router /admin/users [get]
 func (tr *transport) ListUsersHandler(c echo.Context) error {
 	users, err := tr.admin.ListUsers()
 
@@ -17,6 +25,15 @@ func (tr *transport) ListUsersHandler(c echo.Context) error {
 	return c.JSON(http.StatusOK, users)
 }
 
+// CreateUserHandler godoc
+// @Summary Create user
+// @Description create user
+// @Tags users
+// @Accept  json
+// @Produce  json
+// @Param user body CreateUser true "User data"
+// @Success 201 {object} User
+// @Router /admin/users [post]
 func (tr *transport) CreateUserHandler(c echo.Context) error {
 	var data adm.CreateUser
 
